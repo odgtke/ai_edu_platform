@@ -7,6 +7,7 @@ import com.chinaunicom.edu.user.entity.User;
 import com.chinaunicom.edu.user.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -41,7 +42,7 @@ public class UserController {
     }
 
     @PostMapping
-    public Result<Boolean> save(@RequestBody User user) {
+    public Result<Boolean> save(@Valid @RequestBody User user) {
         return Result.success(userService.save(user));
     }
 
