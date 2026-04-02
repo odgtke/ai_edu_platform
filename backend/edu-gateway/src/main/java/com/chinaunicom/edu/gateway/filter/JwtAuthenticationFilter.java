@@ -2,6 +2,7 @@ package com.chinaunicom.edu.gateway.filter;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -15,7 +16,10 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import javax.crypto.spec.SecretKeySpec;
+import java.security.Key;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 
 /**
@@ -25,8 +29,28 @@ import java.util.List;
 @Component
 public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
-    @Value("${jwt.secret:mySecretKey}")
-    private String jwtSecret;
+    private Key signingKey;
+
+    public JwtAuthenticationFilter(@Value("${jwt.secret:}") String jwtSecret) {
+        // 优先从环境变量或配置中心获取密钥
+        String secret = jwtSecret;
+        if (secret == null || secret.isEmpty()) {
+            secret = System.getenv("JWT_SECRET");
+        }
+        if (secret == null || secret.isEmpty()) {
+            secret = System.getProperty("jwt.secret");
+        }
+        
+        // 如果仍没有设置密钥，则生成警告
+        if (secret == null || secret.isEmpty()) {
+            System.err.println("警告: JWT密钥未设置，使用默认密钥存在安全隐患！");
+            secret = "mySecretKey"; // 默认值仅用于开发环境
+        }
+        
+        // 使用Base64编码的密钥以确保兼容性
+        byte[] keyBytes = Base64.getEncoder().encode(secret.getBytes());
+        this.signingKey = new SecretKeySpec(keyBytes, SignatureAlgorithm.HS512.getJcaName());
+    }
 
     // 白名单路径
     private static final List<String> WHITE_LIST = Arrays.asList(
@@ -75,7 +99,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         // 验证Token
         try {
             Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(jwtSecret.getBytes())
+                    .setSigningKey(signingKey)
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
