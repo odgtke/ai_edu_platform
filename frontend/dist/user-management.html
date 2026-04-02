@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎓 智慧教育平台 - 用户管理</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --primary-dark: #2980b9;
+            --secondary-color: #2c3e50;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-bg: #f8f9fa;
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 25px;
+            margin-bottom: 25px;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light-bg);
+        }
+
+        .card-header h2 {
+            color: var(--secondary-color);
+            font-size: 1.5rem;
+        }
+
+        .btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            margin: 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-success { background: var(--success-color); }
+        .btn-success:hover { background: #219653; }
+
+        .btn-warning { background: var(--warning-color); }
+        .btn-warning:hover { background: #d48806; }
+
+        .btn-danger { background: var(--danger-color); }
+        .btn-danger:hover { background: #c0392b; }
+
+        .search-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin: 15px 0;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        tr:hover {
+            background: var(--light-bg);
+        }
+
+        .user-type {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .user-type.student { background: #e3f2fd; color: #1976d2; }
+        .user-type.teacher { background: #e8f5e8; color: #388e3c; }
+        .user-type.parent { background: #fff3e0; color: #f57c00; }
+        .user-type.admin { background: #ffebee; color: #d32f2f; }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-active { background: #e8f5e8; color: #388e3c; }
+        .status-inactive { background: #ffebee; color: #d32f2f; }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0;
+            gap: 10px;
+        }
+
+        .page-btn {
+            padding: 10px 15px;
+            background: white;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .page-btn:hover, .page-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideIn 0.3s ease;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light-bg);
+        }
+
+        .modal-header h3 {
+            color: var(--secondary-color);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+            transition: var(--transition);
+        }
+
+        .close-btn:hover {
+            color: var(--danger-color);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            box-shadow: var(--card-shadow);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success { background: var(--success-color); }
+        .notification.error { background: var(--danger-color); }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2rem; }
+            .search-form { grid-template-columns: 1fr; }
+            .card-header { flex-direction: column; gap: 15px; }
+            th, td { padding: 10px 8px; font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 智慧教育平台</h1>
+            <p>用户管理系统</p>
+        </div>
+
+        <!-- 用户搜索和操作区 -->
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-search"></i> 用户搜索</h2>
+                <button class="btn btn-success" onclick="openUserModal()">
+                    <i class="fas fa-plus"></i> 添加用户
+                </button>
+            </div>
+            
+            <div class="search-form">
+                <div class="form-group">
+                    <label>用户名</label>
+                    <input type="text" id="searchUsername" class="form-control" placeholder="请输入用户名">
+                </div>
+                <div class="form-group">
+                    <label>真实姓名</label>
+                    <input type="text" id="searchRealName" class="form-control" placeholder="请输入真实姓名">
+                </div>
+                <div class="form-group">
+                    <label>用户类型</label>
+                    <select id="searchUserType" class="form-control">
+                        <option value="">全部类型</option>
+                        <option value="1">学生</option>
+                        <option value="2">教师</option>
+                        <option value="3">家长</option>
+                        <option value="4">管理员</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>状态</label>
+                    <select id="searchStatus" class="form-control">
+                        <option value="">全部状态</option>
+                        <option value="1">启用</option>
+                        <option value="0">禁用</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div style="text-align: center;">
+                <button class="btn" onclick="searchUsers()">
+                    <i class="fas fa-search"></i> 搜索用户
+                </button>
+                <button class="btn btn-warning" onclick="resetSearch()">
+                    <i class="fas fa-redo"></i> 重置条件
+                </button>
+            </div>
+        </div>
+
+        <!-- 用户列表 -->
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-users"></i> 用户列表</h2>
+                <div>总计 <span id="totalCount">0</span> 条记录</div>
+            </div>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>用户名</th>
+                            <th>真实姓名</th>
+                            <th>手机号</th>
+                            <th>邮箱</th>
+                            <th>用户类型</th>
+                            <th>状态</th>
+                            <th>创建时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        <tr>
+                            <td colspan="9" style="text-align: center; padding: 30px;">
+                                <i class="fas fa-spinner fa-spin"></i> 正在加载数据...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="pagination" id="pagination">
+                <!-- 分页控件将在这里动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 用户编辑模态框 -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">添加用户</h3>
+                <button class="close-btn" onclick="closeUserModal()">&times;</button>
+            </div>
+            
+            <form id="userForm">
+                <input type="hidden" id="userId">
+                
+                <div class="form-group">
+                    <label>用户名 *</label>
+                    <input type="text" id="username" class="form-control" required placeholder="请输入用户名">
+                </div>
+                
+                <div class="form-group">
+                    <label>密码 *</label>
+                    <input type="password" id="password" class="form-control" required placeholder="请输入密码">
+                </div>
+                
+                <div class="form-group">
+                    <label>真实姓名 *</label>
+                    <input type="text" id="realName" class="form-control" required placeholder="请输入真实姓名">
+                </div>
+                
+                <div class="form-group">
+                    <label>手机号</label>
+                    <input type="tel" id="phone" class="form-control" placeholder="请输入手机号">
+                </div>
+                
+                <div class="form-group">
+                    <label>邮箱</label>
+                    <input type="email" id="email" class="form-control" placeholder="请输入邮箱">
+                </div>
+                
+                <div class="form-group">
+                    <label>用户类型 *</label>
+                    <select id="userType" class="form-control" required>
+                        <option value="">请选择用户类型</option>
+                        <option value="1">学生</option>
+                        <option value="2">教师</option>
+                        <option value="3">家长</option>
+                        <option value="4">管理员</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>状态 *</label>
+                    <select id="status" class="form-control" required>
+                        <option value="1">启用</option>
+                        <option value="0">禁用</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>头像URL</label>
+                    <input type="url" id="avatar" class="form-control" placeholder="请输入头像URL">
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                    <button type="button" class="btn" onclick="closeUserModal()">
+                        <i class="fas fa-times"></i> 取消
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> 保存
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        const API_BASE = 'http://localhost:8081';
+        let currentPage = 1;
+        let pageSize = 10;
+        let totalRecords = 0;
+
+        // 通知系统
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // API请求函数
+        async function apiRequest(url, options = {}) {
+            try {
+                const response = await fetch(`${API_BASE}${url}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                throw new Error(`网络错误: ${error.message}`);
+            }
+        }
+
+        // 获取用户类型文本
+        function getUserTypeText(type) {
+            const types = {1: '学生', 2: '教师', 3: '家长', 4: '管理员'};
+            return types[type] || '未知';
+        }
+
+        // 获取用户类型样式
+        function getUserTypeClass(type) {
+            const classes = {1: 'student', 2: 'teacher', 3: 'parent', 4: 'admin'};
+            return classes[type] || '';
+        }
+
+        // 获取状态文本和样式
+        function getStatusInfo(status) {
+            return status === 1 ? 
+                {text: '启用', class: 'status-active'} : 
+                {text: '禁用', class: 'status-inactive'};
+        }
+
+        // 格式化日期
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('zh-CN') + ' ' + date.toLocaleTimeString('zh-CN', {hour12: false});
+        }
+
+        // 渲染用户表格
+        function renderUserTable(users) {
+            const tbody = document.getElementById('userTableBody');
+            
+            if (!users || users.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" style="text-align: center; padding: 30px;">
+                            <i class="fas fa-info-circle"></i> 暂无数据
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = users.map(user => {
+                const userType = getUserTypeText(user.userType);
+                const userTypeClass = getUserTypeClass(user.userType);
+                const statusInfo = getStatusInfo(user.status);
+                
+                return `
+                    <tr>
+                        <td>${user.userId || '-'}</td>
+                        <td>${user.username || '-'}</td>
+                        <td>${user.realName || '-'}</td>
+                        <td>${user.phone || '-'}</td>
+                        <td>${user.email || '-'}</td>
+                        <td><span class="user-type ${userTypeClass}">${userType}</span></td>
+                        <td><span class="status-badge ${statusInfo.class}">${statusInfo.text}</span></td>
+                        <td>${formatDate(user.createTime)}</td>
+                        <td>
+                            <button class="btn btn-warning" onclick="editUser(${user.userId})">
+                                <i class="fas fa-edit"></i> 编辑
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteUser(${user.userId})">
+                                <i class="fas fa-trash"></i> 删除
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // 渲染分页控件
+        function renderPagination() {
+            const totalPages = Math.ceil(totalRecords / pageSize);
+            const pagination = document.getElementById('pagination');
+            
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                return;
+            }
+
+            let paginationHtml = '';
+            
+            // 上一页
+            if (currentPage > 1) {
+                paginationHtml += `<button class="page-btn" onclick="changePage(${currentPage - 1})">上一页</button>`;
+            }
+            
+            // 页码
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, currentPage + 2);
+            
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHtml += `
+                    <button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">
+                        ${i}
+                    </button>
+                `;
+            }
+            
+            // 下一页
+            if (currentPage < totalPages) {
+                paginationHtml += `<button class="page-btn" onclick="changePage(${currentPage + 1})">下一页</button>`;
+            }
+            
+            pagination.innerHTML = paginationHtml;
+        }
+
+        // 改变页面
+        function changePage(page) {
+            currentPage = page;
+            loadUsers();
+        }
+
+        // 加载用户列表
+        async function loadUsers() {
+            try {
+                const params = new URLSearchParams({
+                    page: currentPage,
+                    size: pageSize
+                });
+
+                // 添加搜索条件
+                const username = document.getElementById('searchUsername').value.trim();
+                const realName = document.getElementById('searchRealName').value.trim();
+                const userType = document.getElementById('searchUserType').value;
+                const status = document.getElementById('searchStatus').value;
+
+                if (username) params.append('username', username);
+                if (realName) params.append('realName', realName);
+                if (userType) params.append('userType', userType);
+                if (status !== '') params.append('status', status);
+
+                const result = await apiRequest(`/users/page?${params}`);
+                
+                if (result.code === 200) {
+                    renderUserTable(result.data.records);
+                    totalRecords = result.data.total;
+                    document.getElementById('totalCount').textContent = totalRecords;
+                    renderPagination();
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                showNotification(`加载用户列表失败: ${error.message}`, 'error');
+                renderUserTable([]);
+            }
+        }
+
+        // 搜索用户
+        function searchUsers() {
+            currentPage = 1;
+            loadUsers();
+        }
+
+        // 重置搜索
+        function resetSearch() {
+            document.getElementById('searchUsername').value = '';
+            document.getElementById('searchRealName').value = '';
+            document.getElementById('searchUserType').value = '';
+            document.getElementById('searchStatus').value = '';
+            currentPage = 1;
+            loadUsers();
+        }
+
+        // 打开用户模态框
+        function openUserModal(userId = null) {
+            const modal = document.getElementById('userModal');
+            const form = document.getElementById('userForm');
+            const title = document.getElementById('modalTitle');
+            
+            // 重置表单
+            form.reset();
+            document.getElementById('userId').value = '';
+            
+            if (userId) {
+                // 编辑模式
+                title.textContent = '编辑用户';
+                document.getElementById('password').required = false;
+                document.getElementById('password').placeholder = '留空则不修改密码';
+                loadUserData(userId);
+            } else {
+                // 添加模式
+                title.textContent = '添加用户';
+                document.getElementById('password').required = true;
+                document.getElementById('password').placeholder = '请输入密码';
+            }
+            
+            modal.classList.add('show');
+        }
+
+        // 关闭用户模态框
+        function closeUserModal() {
+            document.getElementById('userModal').classList.remove('show');
+        }
+
+        // 加载用户数据用于编辑
+        async function loadUserData(userId) {
+            try {
+                const result = await apiRequest(`/users/${userId}`);
+                if (result.code === 200) {
+                    const user = result.data;
+                    document.getElementById('userId').value = user.userId;
+                    document.getElementById('username').value = user.username;
+                    document.getElementById('realName').value = user.realName;
+                    document.getElementById('phone').value = user.phone || '';
+                    document.getElementById('email').value = user.email || '';
+                    document.getElementById('userType').value = user.userType;
+                    document.getElementById('status').value = user.status;
+                    document.getElementById('avatar').value = user.avatar || '';
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                showNotification(`加载用户数据失败: ${error.message}`, 'error');
+                closeUserModal();
+            }
+        }
+
+        // 编辑用户
+        function editUser(userId) {
+            openUserModal(userId);
+        }
+
+        // 删除用户
+        async function deleteUser(userId) {
+            if (!confirm('确定要删除这个用户吗？此操作不可恢复！')) {
+                return;
+            }
+
+            try {
+                const result = await apiRequest(`/users/${userId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (result.code === 200) {
+                    showNotification('用户删除成功', 'success');
+                    loadUsers();
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                showNotification(`删除用户失败: ${error.message}`, 'error');
+            }
+        }
+
+        // 表单提交处理
+        document.getElementById('userForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            try {
+                const formData = new FormData(this);
+                const userId = document.getElementById('userId').value;
+                const isEdit = !!userId;
+                
+                const userData = {
+                    username: document.getElementById('username').value,
+                    realName: document.getElementById('realName').value,
+                    phone: document.getElementById('phone').value,
+                    email: document.getElementById('email').value,
+                    userType: parseInt(document.getElementById('userType').value),
+                    status: parseInt(document.getElementById('status').value),
+                    avatar: document.getElementById('avatar').value
+                };
+
+                // 编辑时如果密码为空则不更新密码
+                const password = document.getElementById('password').value;
+                if (password || !isEdit) {
+                    userData.password = password;
+                }
+
+                let url, method;
+                if (isEdit) {
+                    url = `/users/${userId}`;
+                    method = 'PUT';
+                    userData.userId = parseInt(userId);
+                } else {
+                    url = '/users';
+                    method = 'POST';
+                }
+
+                const result = await apiRequest(url, {
+                    method: method,
+                    body: JSON.stringify(userData)
+                });
+                
+                if (result.code === 200) {
+                    showNotification(isEdit ? '用户更新成功' : '用户创建成功', 'success');
+                    closeUserModal();
+                    loadUsers();
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                showNotification(`操作失败: ${error.message}`, 'error');
+            }
+        });
+
+        // 页面加载完成后初始化
+        window.onload = function() {
+            loadUsers();
+        };
+
+        // 点击模态框外部关闭
+        document.getElementById('userModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeUserModal();
+            }
+        });
+    </script>
+</body>
+</html>

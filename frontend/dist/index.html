@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智慧教育平台 - Vue 3</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        /* 左侧导航栏 */
+        .sidebar {
+            width: 240px;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            padding: 25px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+        
+        .logo h1 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .logo p {
+            font-size: 0.75rem;
+            color: #8892b0;
+            margin-top: 5px;
+        }
+        
+        .nav-menu {
+            flex: 1;
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+        
+        .nav-section {
+            margin-bottom: 20px;
+        }
+        
+        .nav-section-title {
+            padding: 10px 20px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #8892b0;
+            font-weight: 600;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+            margin: 2px 0;
+        }
+        
+        .nav-item:hover {
+            background: rgba(255,255,255,0.05);
+            border-left-color: #4facfe;
+        }
+        
+        .nav-item.active {
+            background: rgba(79, 172, 254, 0.15);
+            border-left-color: #4facfe;
+        }
+        
+        .nav-item i {
+            width: 24px;
+            font-size: 1.1rem;
+            margin-right: 12px;
+            text-align: center;
+        }
+        
+        .nav-item span {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .nav-badge {
+            margin-left: auto;
+            background: #e74c3c;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        
+        .user-details h4 {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .user-details p {
+            font-size: 0.75rem;
+            color: #8892b0;
+        }
+        
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        /* 顶部栏 */
+        .header {
+            height: 70px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            z-index: 10;
+        }
+        
+        .header-left h2 {
+            font-size: 1.3rem;
+            color: #1a1a2e;
+            font-weight: 600;
+        }
+        
+        .header-left p {
+            font-size: 0.85rem;
+            color: #8892b0;
+            margin-top: 2px;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .search-box {
+            position: relative;
+        }
+        
+        .search-box input {
+            width: 300px;
+            padding: 10px 40px 10px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 25px;
+            outline: none;
+            font-size: 0.9rem;
+            transition: border-color 0.3s;
+        }
+        
+        .search-box input:focus {
+            border-color: #4facfe;
+        }
+        
+        .search-box i {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8892b0;
+        }
+        
+        .header-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #f5f7fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            transition: background 0.3s;
+        }
+        
+        .header-icon:hover {
+            background: #e8ecf1;
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 18px;
+            height: 18px;
+            background: #e74c3c;
+            color: white;
+            font-size: 0.65rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* 内容区域 */
+        .content-area {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            background: #f5f7fa;
+        }
+        
+        .page-section {
+            display: none;
+        }
+        
+        .page-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* 统计卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .stat-icon.blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .stat-icon.green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .stat-icon.orange { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .stat-icon.purple { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #8892b0;
+        }
+        
+        .stat-change {
+            font-size: 0.8rem;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+        
+        .stat-change.positive { color: #11998e; }
+        .stat-change.negative { color: #e74c3c; }
+        
+        /* 内容卡片 */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+        
+        .card-action {
+            font-size: 0.85rem;
+            color: #4facfe;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .card-body {
+            padding: 25px;
+        }
+        
+        /* 快速操作 */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .quick-action-btn {
+            padding: 20px;
+            border: 2px solid #f0f0f0;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+        
+        .quick-action-btn:hover {
+            border-color: #4facfe;
+            background: #f8fbff;
+            transform: translateY(-3px);
+        }
+        
+        .quick-action-btn i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .quick-action-btn span {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #1a1a2e;
+        }
+        
+        /* 响应式 */
+        @media (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+            .logo h1, .nav-item span, .nav-section-title, .user-details {
+                display: none;
+            }
+            .nav-item {
+                justify-content: center;
+                padding: 15px;
+            }
+            .nav-item i {
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 左侧导航栏 -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h1>智慧教育平台</h1>
+                <p>AI-Edu Platform</p>
+            </div>
+            
+            <nav class="nav-menu">
+                <div class="nav-section">
+                    <div class="nav-section-title">主要功能</div>
+                    <div class="nav-item active" onclick="switchPage('dashboard')">
+                        <i>📊</i>
+                        <span>数据概览</span>
+                    </div>
+                    <div class="nav-item" onclick="switchPage('users')">
+                        <i>👥</i>
+                        <span>用户管理</span>
+                    </div>
+                    <div class="nav-item" onclick="switchPage('courses')">
+                        <i>📚</i>
+                        <span>课程管理</span>
+                    </div>
+                    <div class="nav-item" onclick="switchPage('learning')">
+                        <i>🎓</i>
+                        <span>学习中心</span>
+                    </div>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">智能服务</div>
+                    <div class="nav-item" onclick="switchPage('agent')">
+                        <i>🤖</i>
+                        <span>智能助手</span>
+                        <span class="nav-badge">AI</span>
+                    </div>
+                    <div class="nav-item" onclick="switchPage('assessment')">
+                        <i>📊</i>
+                        <span>能力评估</span>
+                    </div>
+                    <div class="nav-item" onclick="switchPage('recommend')">
+                        <i>⭐</i>
+                        <span>个性推荐</span>
+                    </div>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">系统设置</div>
+                    <div class="nav-item" onclick="switchPage('settings')">
+                        <i>⚙️</i>
+                        <span>系统设置</span>
+                    </div>
+                    <div class="nav-item" onclick="switchPage('help')">
+                        <i>❓</i>
+                        <span>帮助中心</span>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar">管</div>
+                    <div class="user-details">
+                        <h4>管理员</h4>
+                        <p>admin@edu.com</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 顶部栏 -->
+            <header class="header">
+                <div class="header-left">
+                    <h2 id="pageTitle">数据概览</h2>
+                    <p id="pageSubtitle">欢迎回来，查看平台最新数据</p>
+                </div>
+                <div class="header-right">
+                    <div class="search-box">
+                        <input type="text" placeholder="搜索功能、课程、用户...">
+                        <i>🔍</i>
+                    </div>
+                    <div class="header-icon">
+                        <i>🔔</i>
+                        <span class="notification-badge">3</span>
+                    </div>
+                    <div class="header-icon">
+                        <i>✉️</i>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- 内容区域 -->
+            <div class="content-area">
+                <!-- 数据概览页 -->
+                <div id="dashboard" class="page-section active">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon blue">👥</div>
+                            <div class="stat-value" id="totalUsers">0</div>
+                            <div class="stat-label">总用户数</div>
+                            <div class="stat-change positive">↑ 12% 较上月</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon green">📚</div>
+                            <div class="stat-value" id="totalCourses">0</div>
+                            <div class="stat-label">课程总数</div>
+                            <div class="stat-change positive">↑ 8% 较上月</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon orange">🎓</div>
+                            <div class="stat-value" id="activeLearners">0</div>
+                            <div class="stat-label">活跃学习者</div>
+                            <div class="stat-change positive">↑ 15% 较上月</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon purple">⭐</div>
+                            <div class="stat-value">98%</div>
+                            <div class="stat-label">满意度</div>
+                            <div class="stat-change positive">↑ 3% 较上月</div>
+                        </div>
+                    </div>
+                    
+                    <div class="content-grid">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">📈 学习趋势</h3>
+                                <span class="card-action">查看详情 →</span>
+                            </div>
+                            <div class="card-body">
+                                <div style="margin-bottom: 20px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                        <div>
+                                            <span style="font-size: 1.5rem; font-weight: 700; color: #1a1a2e;">2,847</span>
+                                            <span style="font-size: 0.9rem; color: #8892b0; margin-left: 5px;">本周学习人次</span>
+                                        </div>
+                                        <div style="display: flex; gap: 20px;">
+                                            <div style="text-align: center;">
+                                                <div style="font-size: 0.75rem; color: #8892b0;">日均</div>
+                                                <div style="font-size: 1rem; font-weight: 600; color: #4facfe;">407</div>
+                                            </div>
+                                            <div style="text-align: center;">
+                                                <div style="font-size: 0.75rem; color: #8892b0;">峰值</div>
+                                                <div style="font-size: 1rem; font-weight: 600; color: #11998e;">586</div>
+                                            </div>
+                                            <div style="text-align: center;">
+                                                <div style="font-size: 0.75rem; color: #8892b0;">增长</div>
+                                                <div style="font-size: 1rem; font-weight: 600; color: #e74c3c;">+23%</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 柱状图 -->
+                                <div style="height: 200px; display: flex; align-items: flex-end; justify-content: space-between; padding: 20px 0; border-bottom: 2px solid #f0f0f0;">
+                                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                                        <div style="font-size: 0.75rem; color: #4facfe; font-weight: 600;">380</div>
+                                        <div style="width: 30px; height: 120px; background: linear-gradient(180deg, #4facfe 0%, #00f2fe 100%); border-radius: 4px 4px 0 0; position: relative;">
+                                            <div style="position: absolute; top: -5px; left: 50%; transform: translateX(-50%); width: 8px; height: 8px; background: #4facfe; border-radius: 50%;"></div>
+                                        </div>
+                                        <div style="font-size: 0.8rem; color: #8892b0;">周一</div>
+                                    </div>
+                                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                                        <div style="font-size: 0.75rem; color: #4facfe; font-weight: 600;">420</div>
+                                        <div style="width: 30px; height: 140px; background: linear-gradient(180deg, #4facfe 0%, #00f2fe 100%); border-radius: 4px 4px 0 0;"></div>
+                                        <div style="font-size: 0.8rem; color: #8892b0;">周二</div>
+                                    </div>
+                                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                                        <div style="font-size: 0.75rem; color: #4facfe; font-weight: 600;">350</div>
+                                        <div style="width: 30px; height: 110px; background: linear-gradient(180deg, #4facfe 0%, #00f2fe 100%); border-radius: 4px 4px 0 0;"></div>
+                                        <div style="font-size: 0.8rem; color: #8892b0;">周三</div>
+                                    </div>
+                                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                                        <div style="font-size: 0.75rem; color: #11998e; font-weight: 600;">586</div>
+                                        <div style="width: 30px; height: 180px; background: linear-gradient(180deg, #11998e 0%, #38ef7d 100%); border-radius: 4px 4px 0 0; box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);"></div>
+                                        <div style="font-size: 0.8rem; color: #8892b0;">周四</div>
+                                    </div>
+                                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                                        <div style="font-size: 0.75rem; color: #4facfe; font-weight: 600;">445</div>
+                                        <div style="width: 30px; height: 150px; background: linear-gradient(180deg, #4facfe 0%, #00f2fe 100%); border-radius: 4px 4px 0 0;"></div>
+                                        <div style="font-size: 0.8rem; color: #8892b0;">周五</div>
+                                    </div>
+                                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                                        <div style="font-size: 0.75rem; color: #f093fb; font-weight: 600;">520</div>
+                                        <div style="width: 30px; height: 165px; background: linear-gradient(180deg, #f093fb 0%, #f5576c 100%); border-radius: 4px 4px 0 0;"></div>
+                                        <div style="font-size: 0.8rem; color: #8892b0;">周六</div>
+                                    </div>
+                                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                                        <div style="font-size: 0.75rem; color: #4facfe; font-weight: 600;">146</div>
+                                        <div style="width: 30px; height: 50px; background: linear-gradient(180deg, #e0e0e0 0%, #f0f0f0 100%); border-radius: 4px 4px 0 0;"></div>
+                                        <div style="font-size: 0.8rem; color: #8892b0;">周日</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 图例和说明 -->
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #f0f0f0;">
+                                    <div style="display: flex; gap: 20px;">
+                                        <div style="display: flex; align-items: center; gap: 6px;">
+                                            <div style="width: 12px; height: 12px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); border-radius: 2px;"></div>
+                                            <span style="font-size: 0.8rem; color: #666;">工作日</span>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 6px;">
+                                            <div style="width: 12px; height: 12px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 2px;"></div>
+                                            <span style="font-size: 0.8rem; color: #666;">周末高峰</span>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 6px;">
+                                            <div style="width: 12px; height: 12px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); border-radius: 2px;"></div>
+                                            <span style="font-size: 0.8rem; color: #666;">最高记录</span>
+                                        </div>
+                                    </div>
+                                    <div style="font-size: 0.8rem; color: #8892b0;">
+                                        数据更新于: 2026-03-17 09:00
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">⚡ 快速操作</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="quick-actions">
+                                    <div class="quick-action-btn" onclick="switchPage('users')">
+                                        <i>➕</i>
+                                        <span>添加用户</span>
+                                    </div>
+                                    <div class="quick-action-btn" onclick="switchPage('courses')">
+                                        <i>📖</i>
+                                        <span>新建课程</span>
+                                    </div>
+                                    <div class="quick-action-btn" onclick="switchPage('agent')">
+                                        <i>💬</i>
+                                        <span>智能问答</span>
+                                    </div>
+                                    <div class="quick-action-btn" onclick="switchPage('assessment')">
+                                        <i>📝</i>
+                                        <span>发布测评</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 用户管理页 -->
+                <div id="users" class="page-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">👥 用户管理</h3>
+                            <span class="card-action" onclick="showUserModal()">+ 添加用户</span>
+                        </div>
+                        <div class="card-body">
+                            <iframe src="user-management-vue.html" style="width: 100%; height: 600px; border: none;"></iframe>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 课程管理页 -->
+                <div id="courses" class="page-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">📚 课程管理</h3>
+                            <span class="card-action" onclick="showCourseModal()">+ 添加课程</span>
+                        </div>
+                        <div class="card-body">
+                            <iframe src="course-management-vue.html" style="width: 100%; height: 600px; border: none;"></iframe>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 学习中心页 -->
+                <div id="learning" class="page-section">
+                    <div class="content-grid">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">📚 我的课程</h3>
+                                <span class="card-action">查看全部 →</span>
+                            </div>
+                            <div class="card-body">
+                                <div id="myCoursesList">
+                                    <!-- 动态加载 -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">📊 学习进度</h3>
+                            </div>
+                            <div class="card-body">
+                                <div style="margin-bottom: 25px;">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                        <span style="font-size: 0.9rem; color: #555;">本周学习时长</span>
+                                        <span style="font-size: 0.9rem; font-weight: 600; color: #4facfe;">12.5 小时</span>
+                                    </div>
+                                    <div style="height: 8px; background: #f0f0f0; border-radius: 4px; overflow: hidden;">
+                                        <div style="width: 75%; height: 100%; background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%); border-radius: 4px;"></div>
+                                    </div>
+                                    <p style="font-size: 0.8rem; color: #8892b0; margin-top: 5px;">目标: 15小时/周</p>
+                                </div>
+                                
+                                <div style="margin-bottom: 25px;">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                        <span style="font-size: 0.9rem; color: #555;">课程完成率</span>
+                                        <span style="font-size: 0.9rem; font-weight: 600; color: #11998e;">68%</span>
+                                    </div>
+                                    <div style="height: 8px; background: #f0f0f0; border-radius: 4px; overflow: hidden;">
+                                        <div style="width: 68%; height: 100%; background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%); border-radius: 4px;"></div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                        <span style="font-size: 0.9rem; color: #555;">作业提交率</span>
+                                        <span style="font-size: 0.9rem; font-weight: 600; color: #f093fb;">92%</span>
+                                    </div>
+                                    <div style="height: 8px; background: #f0f0f0; border-radius: 4px; overflow: hidden;">
+                                        <div style="width: 92%; height: 100%; background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%); border-radius: 4px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card" style="margin-top: 25px;">
+                        <div class="card-header">
+                            <h3 class="card-title">📅 学习日历</h3>
+                            <span class="card-action">本月学习记录</span>
+                        </div>
+                        <div class="card-body">
+                            <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; text-align: center;">
+                                <div style="font-weight: 600; color: #8892b0; padding: 10px;">日</div>
+                                <div style="font-weight: 600; color: #8892b0; padding: 10px;">一</div>
+                                <div style="font-weight: 600; color: #8892b0; padding: 10px;">二</div>
+                                <div style="font-weight: 600; color: #8892b0; padding: 10px;">三</div>
+                                <div style="font-weight: 600; color: #8892b0; padding: 10px;">四</div>
+                                <div style="font-weight: 600; color: #8892b0; padding: 10px;">五</div>
+                                <div style="font-weight: 600; color: #8892b0; padding: 10px;">六</div>
+                                
+                                <!-- 日历日期 -->
+                                <div style="padding: 15px 10px; color: #ccc;">28</div>
+                                <div style="padding: 15px 10px; color: #ccc;">29</div>
+                                <div style="padding: 15px 10px; color: #ccc;">30</div>
+                                <div style="padding: 15px 10px; color: #ccc;">31</div>
+                                <div style="padding: 15px 10px; background: #e8f5e9; border-radius: 8px; color: #388e3c; font-weight: 500;">1<br><small style="font-size: 0.7rem;">2h</small></div>
+                                <div style="padding: 15px 10px; background: #e3f2fd; border-radius: 8px; color: #1976d2; font-weight: 500;">2<br><small style="font-size: 0.7rem;">1.5h</small></div>
+                                <div style="padding: 15px 10px; background: #fff3e0; border-radius: 8px; color: #f57c00; font-weight: 500;">3<br><small style="font-size: 0.7rem;">3h</small></div>
+                                <div style="padding: 15px 10px;">4</div>
+                                <div style="padding: 15px 10px; background: #e8f5e9; border-radius: 8px; color: #388e3c; font-weight: 500;">5<br><small style="font-size: 0.7rem;">2.5h</small></div>
+                                <div style="padding: 15px 10px; background: #e3f2fd; border-radius: 8px; color: #1976d2; font-weight: 500;">6<br><small style="font-size: 0.7rem;">1h</small></div>
+                                <div style="padding: 15px 10px; background: #fce4ec; border-radius: 8px; color: #c2185b; font-weight: 500;">7<br><small style="font-size: 0.7rem;">4h</small></div>
+                                <div style="padding: 15px 10px;">8</div>
+                                <div style="padding: 15px 10px; background: #e8f5e9; border-radius: 8px; color: #388e3c; font-weight: 500;">9<br><small style="font-size: 0.7rem;">2h</small></div>
+                                <div style="padding: 15px 10px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); border-radius: 8px; color: white; font-weight: 500; box-shadow: 0 4px 15px rgba(79,172,254,0.4);">10<br><small style="font-size: 0.7rem;">今天</small></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 智能助手页 -->
+                <div id="agent" class="page-section">
+                    <div class="card" style="height: calc(100vh - 170px);">
+                        <div class="card-header">
+                            <h3 class="card-title">🤖 智能学习助手</h3>
+                            <span class="card-action">AI 驱动</span>
+                        </div>
+                        <div class="card-body" style="padding: 0; height: calc(100% - 65px);">
+                            <iframe src="langchain-agent-vue.html" style="width: 100%; height: 100%; border: none;"></iframe>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 能力评估页 -->
+                <div id="assessment" class="page-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">📊 能力评估</h3>
+                            <span class="card-action" onclick="window.location.href='assessment-system.html'" style="cursor: pointer;">开始测评 →</span>
+                        </div>
+                        <div class="card-body">
+                            <div style="text-align: center; padding: 60px 20px;">
+                                <div style="font-size: 5rem; margin-bottom: 20px;">📋</div>
+                                <h3 style="color: #1a1a2e; margin-bottom: 10px;">能力评估系统</h3>
+                                <p style="color: #8892b0; margin-bottom: 30px;">通过智能测评了解学习情况，获取个性化建议</p>
+                                <button onclick="window.location.href='assessment-system.html'" style="padding: 12px 30px; background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%); color: white; border: none; border-radius: 25px; cursor: pointer; font-size: 1rem; transition: transform 0.3s ease;">开始能力测评</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 个性推荐页 -->
+                <div id="recommend" class="page-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">⭐ 个性推荐</h3>
+                            <span class="card-action" onclick="window.location.href='recommendation-system.html'" style="cursor: pointer;">进入推荐系统 →</span>
+                        </div>
+                        <div class="card-body">
+                            <div style="text-align: center; padding: 60px 20px;">
+                                <div style="font-size: 5rem; margin-bottom: 20px;">🎯</div>
+                                <h3 style="color: #1a1a2e; margin-bottom: 10px;">个性化推荐引擎</h3>
+                                <p style="color: #8892b0; margin-bottom: 30px;">基于学习行为和兴趣，智能推荐适合的课程和资源</p>
+                                <button onclick="window.location.href='recommendation-system.html'" style="padding: 12px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">开始个性推荐</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 系统设置页 -->
+                <div id="settings" class="page-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">⚙️ 系统设置</h3>
+                        </div>
+                        <div class="card-body">
+                            <div style="max-width: 600px;">
+                                <div style="margin-bottom: 25px;">
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #1a1a2e;">平台名称</label>
+                                    <input type="text" value="智慧教育平台" style="width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 0.95rem;">
+                                </div>
+                                <div style="margin-bottom: 25px;">
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #1a1a2e;">系统邮箱</label>
+                                    <input type="email" value="admin@edu.com" style="width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 0.95rem;">
+                                </div>
+                                <div style="margin-bottom: 25px;">
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #1a1a2e;">AI模型配置</label>
+                                    <select style="width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 0.95rem;">
+                                        <option value="mock">Mock模式（演示）</option>
+                                        <option value="openai">OpenAI GPT</option>
+                                        <option value="local">本地模型</option>
+                                    </select>
+                                </div>
+                                <button style="padding: 12px 30px; background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem;">保存设置</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 帮助中心页 -->
+                <div id="help" class="page-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">❓ 帮助中心</h3>
+                        </div>
+                        <div class="card-body">
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                                <div style="padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                                    <h4 style="color: #1a1a2e; margin-bottom: 10px;">📖 使用指南</h4>
+                                    <p style="color: #8892b0; font-size: 0.9rem;">了解平台各项功能的使用方法</p>
+                                </div>
+                                <div style="padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                                    <h4 style="color: #1a1a2e; margin-bottom: 10px;">🤖 智能助手</h4>
+                                    <p style="color: #8892b0; font-size: 0.9rem;">AI助手帮助解答各类问题</p>
+                                </div>
+                                <div style="padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                                    <h4 style="color: #1a1a2e; margin-bottom: 10px;">📞 联系客服</h4>
+                                    <p style="color: #8892b0; font-size: 0.9rem;">工作时间：9:00-18:00</p>
+                                </div>
+                                <div style="padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                                    <h4 style="color: #1a1a2e; margin-bottom: 10px;">💬 反馈建议</h4>
+                                    <p style="color: #8892b0; font-size: 0.9rem;">帮助我们改进产品体验</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        // 页面切换
+        function switchPage(pageId) {
+            // 更新导航状态
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            // 更新页面标题
+            const titles = {
+                'dashboard': { title: '数据概览', subtitle: '欢迎回来，查看平台最新数据' },
+                'users': { title: '用户管理', subtitle: '管理系统用户信息' },
+                'courses': { title: '课程管理', subtitle: '管理课程信息和内容' },
+                'learning': { title: '学习中心', subtitle: '查看学习进度和记录' },
+                'agent': { title: '智能助手', subtitle: 'AI驱动的智能问答服务' },
+                'assessment': { title: '能力评估', subtitle: '学习效果测评和分析' },
+                'recommend': { title: '个性推荐', subtitle: '基于AI的个性化内容推荐' },
+                'settings': { title: '系统设置', subtitle: '配置平台参数' },
+                'help': { title: '帮助中心', subtitle: '获取使用帮助和支持' }
+            };
+            
+            const pageInfo = titles[pageId];
+            if (pageInfo) {
+                document.getElementById('pageTitle').textContent = pageInfo.title;
+                document.getElementById('pageSubtitle').textContent = pageInfo.subtitle;
+            }
+            
+            // 切换页面内容
+            document.querySelectorAll('.page-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+        }
+        
+        // 模拟统计数据
+        const mockStats = {
+            totalUsers: 1258,
+            totalCourses: 86,
+            activeLearners: 892,
+            satisfaction: 98
+        };
+        
+        // 加载统计数据
+        async function loadStats() {
+            try {
+                const [usersRes, coursesRes] = await Promise.all([
+                    fetch('/api/users/count'),
+                    fetch('/api/courses/count'),
+                ]);
+                
+                const usersData = await usersRes.json();
+                const coursesData = await coursesRes.json();
+                
+                if (usersData.code === 200 && usersData.data > 0) {
+                    document.getElementById('totalUsers').textContent = usersData.data;
+                    document.getElementById('activeLearners').textContent = Math.floor(usersData.data * 0.7);
+                } else {
+                    // 使用模拟数据
+                    document.getElementById('totalUsers').textContent = mockStats.totalUsers;
+                    document.getElementById('activeLearners').textContent = mockStats.activeLearners;
+                }
+                
+                if (coursesData.code === 200 && coursesData.data > 0) {
+                    document.getElementById('totalCourses').textContent = coursesData.data;
+                } else {
+                    document.getElementById('totalCourses').textContent = mockStats.totalCourses;
+                }
+            } catch (error) {
+                console.log('使用模拟数据展示');
+                document.getElementById('totalUsers').textContent = mockStats.totalUsers;
+                document.getElementById('totalCourses').textContent = mockStats.totalCourses;
+                document.getElementById('activeLearners').textContent = mockStats.activeLearners;
+            }
+        }
+        
+        // 模拟我的课程数据
+        const mockMyCourses = [
+            { id: 1, name: 'Python编程入门', progress: 75, totalLessons: 20, completedLessons: 15, lastStudy: '2小时前', image: '🐍' },
+            { id: 2, name: 'Web前端开发实战', progress: 45, totalLessons: 25, completedLessons: 11, lastStudy: '昨天', image: '🌐' },
+            { id: 3, name: '数据分析与可视化', progress: 30, totalLessons: 18, completedLessons: 5, lastStudy: '3天前', image: '📊' },
+            { id: 4, name: '人工智能基础', progress: 10, totalLessons: 30, completedLessons: 3, lastStudy: '1周前', image: '🤖' }
+        ];
+        
+        // 加载我的课程
+        function loadMyCourses() {
+            const container = document.getElementById('myCoursesList');
+            if (!container) return;
+            
+            container.innerHTML = mockMyCourses.map(course => `
+                <div style="display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #f0f0f0; transition: background 0.3s; cursor: pointer;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='white'">
+                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-right: 15px;">
+                        ${course.image}
+                    </div>
+                    <div style="flex: 1;">
+                        <h4 style="font-size: 1rem; color: #1a1a2e; margin-bottom: 5px;">${course.name}</h4>
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <div style="flex: 1; height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden;">
+                                <div style="width: ${course.progress}%; height: 100%; background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%); border-radius: 3px;"></div>
+                            </div>
+                            <span style="font-size: 0.8rem; color: #4facfe; font-weight: 500;">${course.progress}%</span>
+                        </div>
+                        <p style="font-size: 0.8rem; color: #8892b0; margin-top: 5px;">已学 ${course.completedLessons}/${course.totalLessons} 课时 · 上次学习: ${course.lastStudy}</p>
+                    </div>
+                    <button style="padding: 8px 20px; background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%); color: white; border: none; border-radius: 20px; cursor: pointer; font-size: 0.85rem; font-weight: 500;">继续学习</button>
+                </div>
+            `).join('');
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStats();
+            loadMyCourses();
+        });
+        
+        // 显示用户模态框
+        function showUserModal() {
+            // 通过iframe调用用户管理页面的添加功能
+            const iframe = document.querySelector('#users iframe');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.showAddModal && iframe.contentWindow.showAddModal();
+            }
+        }
+        
+        // 显示课程模态框
+        function showCourseModal() {
+            const iframe = document.querySelector('#courses iframe');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.showAddModal && iframe.contentWindow.showAddModal();
+            }
+        }
+    </script>
+</body>
+</html>

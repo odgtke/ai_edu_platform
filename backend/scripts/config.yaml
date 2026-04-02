@@ -1,0 +1,125 @@
+# 智慧教育平台自动化开发配置文件
+
+project:
+  name: "智慧教育平台"
+  version: "1.0.0"
+  group_id: "com.chinaunicom"
+  artifact_id: "ai-edu-platform"
+
+technology_stack:
+  backend:
+    framework: "spring-boot"
+    version: "2.7.10"
+    database: "mysql"
+    cache: "redis"
+  frontend:
+    framework: "vue3"
+    ui_library: "element-plus"
+
+modules:
+  user:
+    priority: "P0"
+    dependencies: []
+    entities:
+      - User
+      - Role
+      - Permission
+    apis:
+      - user_auth
+      - user_management
+      - role_management
+  
+  course:
+    priority: "P0"
+    dependencies: ["user"]
+    entities:
+      - Course
+      - Lesson
+      - Subject
+    apis:
+      - course_management
+      - lesson_management
+      - enrollment
+  
+  assignment:
+    priority: "P1"
+    dependencies: ["user", "course"]
+    entities:
+      - Assignment
+      - StudentAssignment
+      - Submission
+    apis:
+      - assignment_management
+      - submission_handling
+      - grading
+  
+  message:
+    priority: "P1"
+    dependencies: ["user"]
+    entities:
+      - Message
+      - Notification
+      - Conversation
+    apis:
+      - messaging
+      - notifications
+      - real_time_chat
+  
+  resource:
+    priority: "P1"
+    dependencies: ["user"]
+    entities:
+      - Resource
+      - Category
+      - DownloadRecord
+    apis:
+      - resource_management
+      - file_upload
+      - resource_sharing
+
+testing:
+  unit_test_coverage: 80
+  integration_test: true
+  test_framework: "junit5"
+  mock_framework: "mockito"
+
+database:
+  type: "mysql"
+  host: "localhost"
+  port: 3306
+  name: "edu_platform"
+  username: "root"
+  password: "root123"
+
+redis:
+  host: "localhost"
+  port: 6379
+  database: 0
+
+logging:
+  level: "INFO"
+  pattern: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file_path: "./logs/application.log"
+
+security:
+  jwt_secret: "mySecretKey"
+  jwt_expiration: 86400000
+  password_encoder: "bcrypt"
+  cors_allowed_origins:
+    - "http://localhost:8080"
+    - "http://localhost:3000"
+
+server:
+  port: 8080
+  context_path: "/api"
+  max_threads: 200
+  connection_timeout: 20000
+
+file_upload:
+  max_size: "10MB"
+  allowed_types:
+    - "image/jpeg"
+    - "image/png"
+    - "application/pdf"
+    - "video/mp4"
+  storage_path: "./uploads"

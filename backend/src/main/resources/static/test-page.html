@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智慧教育平台 - API测试页面</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+        .section-title {
+            color: #3498db;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border-left: 4px solid #3498db;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success {
+            border-left-color: #27ae60;
+            background-color: #f8fff8;
+        }
+        .error {
+            border-left-color: #e74c3c;
+            background-color: #fff8f8;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            background: #f8f9fa;
+            border: 1px solid #eee;
+            border-bottom: none;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+        }
+        .tab.active {
+            background: white;
+            border-bottom: 1px solid white;
+            margin-bottom: -1px;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-running {
+            background-color: #27ae60;
+        }
+        .status-stopped {
+            background-color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎓 智慧教育平台 API 测试页面</h1>
+        
+        <div style="text-align: center; margin-bottom: 20px;">
+            <span class="status-indicator status-stopped" id="serverStatus"></span>
+            <span id="statusText">服务器状态: 检查中...</span>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('users')">用户管理</div>
+            <div class="tab" onclick="switchTab('courses')">课程管理</div>
+            <div class="tab" onclick="switchTab('learning')">学习中心</div>
+            <div class="tab" onclick="switchTab('about')">系统信息</div>
+        </div>
+
+        <!-- 用户管理 Tab -->
+        <div id="users" class="tab-content active">
+            <div class="section">
+                <div class="section-title">👥 用户列表</div>
+                <button onclick="getAllUsers()">获取所有用户</button>
+                <button onclick="clearResult('users-result')">清空结果</button>
+                <div id="users-result" class="result"></div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">➕ 创建用户</div>
+                <div class="form-group">
+                    <label>用户名:</label>
+                    <input type="text" id="new-username" placeholder="输入用户名">
+                </div>
+                <div class="form-group">
+                    <label>密码:</label>
+                    <input type="password" id="new-password" placeholder="输入密码">
+                </div>
+                <div class="form-group">
+                    <label>真实姓名:</label>
+                    <input type="text" id="new-realname" placeholder="输入真实姓名">
+                </div>
+                <div class="form-group">
+                    <label>手机号:</label>
+                    <input type="text" id="new-phone" placeholder="输入手机号">
+                </div>
+                <div class="form-group">
+                    <label>邮箱:</label>
+                    <input type="email" id="new-email" placeholder="输入邮箱">
+                </div>
+                <div class="form-group">
+                    <label>用户类型:</label>
+                    <select id="new-usertype">
+                        <option value="1">学生</option>
+                        <option value="2">教师</option>
+                        <option value="3">家长</option>
+                        <option value="4">管理员</option>
+                    </select>
+                </div>
+                <button onclick="createUser()">创建用户</button>
+                <div id="create-user-result" class="result"></div>
+            </div>
+        </div>
+
+        <!-- 课程管理 Tab -->
+        <div id="courses" class="tab-content">
+            <div class="section">
+                <div class="section-title">📚 课程列表</div>
+                <button onclick="getAllCourses()">获取所有课程</button>
+                <button onclick="clearResult('courses-result')">清空结果</button>
+                <div id="courses-result" class="result"></div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">➕ 创建课程</div>
+                <div class="form-group">
+                    <label>课程名称:</label>
+                    <input type="text" id="new-course-name" placeholder="输入课程名称">
+                </div>
+                <div class="form-group">
+                    <label>课程编码:</label>
+                    <input type="text" id="new-course-code" placeholder="输入课程编码">
+                </div>
+                <div class="form-group">
+                    <label>课程描述:</label>
+                    <textarea id="new-course-desc" placeholder="输入课程描述" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>教师ID:</label>
+                    <input type="number" id="new-teacher-id" placeholder="输入教师ID" value="2">
+                </div>
+                <div class="form-group">
+                    <label>年级:</label>
+                    <input type="number" id="new-grade-level" placeholder="输入年级" value="9">
+                </div>
+                <div class="form-group">
+                    <label>学科ID:</label>
+                    <input type="number" id="new-subject-id" placeholder="输入学科ID" value="1">
+                </div>
+                <div class="form-group">
+                    <label>学分:</label>
+                    <input type="number" id="new-credit" placeholder="输入学分" step="0.1" value="2.0">
+                </div>
+                <button onclick="createCourse()">创建课程</button>
+                <div id="create-course-result" class="result"></div>
+            </div>
+        </div>
+
+        <!-- 学习中心 Tab -->
+        <div id="learning" class="tab-content">
+            <div class="section">
+                <div class="section-title">📊 学习记录</div>
+                <div class="form-group">
+                    <label>学生ID:</label>
+                    <input type="number" id="student-id" placeholder="输入学生ID" value="1">
+                </div>
+                <button onclick="getStudentRecords()">获取学习记录</button>
+                <button onclick="getStudentStatistics()">获取学习统计</button>
+                <button onclick="clearResult('learning-result')">清空结果</button>
+                <div id="learning-result" class="result"></div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">➕ 创建学习记录</div>
+                <div class="form-group">
+                    <label>学生ID:</label>
+                    <input type="number" id="record-student-id" placeholder="学生ID" value="1">
+                </div>
+                <div class="form-group">
+                    <label>课程ID:</label>
+                    <input type="number" id="record-course-id" placeholder="课程ID" value="1">
+                </div>
+                <div class="form-group">
+                    <label>学习时长(分钟):</label>
+                    <input type="number" id="record-duration" placeholder="学习时长" value="45">
+                </div>
+                <div class="form-group">
+                    <label>学习进度(%):</label>
+                    <input type="number" id="record-progress" placeholder="进度" value="75" min="0" max="100">
+                </div>
+                <button onclick="createLearningRecord()">创建学习记录</button>
+                <div id="create-record-result" class="result"></div>
+            </div>
+        </div>
+
+        <!-- 系统信息 Tab -->
+        <div id="about" class="tab-content">
+            <div class="section">
+                <div class="section-title">ℹ️ 系统信息</div>
+                <div class="result">
+智慧教育平台 v1.0.0
+
+📋 项目特点:
+• 基于Spring Boot的现代化教育平台
+• 微服务架构设计，模块化开发
+• 完整的用户管理、课程管理、学习中心功能
+• RESTful API接口设计
+• JWT认证和RBAC权限控制
+
+🚀 核心功能:
+• 用户注册登录和权限管理
+• 课程创建、编辑、查询管理
+• 学习记录跟踪和进度统计
+• 数据分析和个性化推荐
+
+🔧 技术栈:
+• 后端: Spring Boot 2.7.10 + MyBatis Plus 3.5.3
+• 数据库: MySQL 8.0 + Redis 6.x
+• 前端: HTML5 + JavaScript (此测试页面)
+• 测试: JUnit 5 + Mockito
+
+📱 API端点:
+• 用户管理: /api/users
+• 课程管理: /api/courses  
+• 学习中心: /api/learning
+
+💡 使用说明:
+1. 确保后端服务已启动 (默认端口8080)
+2. 在各个Tab页中测试相应的API功能
+3. 查看返回结果验证功能是否正常
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://localhost:8080/api';
+        
+        // 检查服务器状态
+        function checkServerStatus() {
+            fetch(BASE_URL + '/users')
+                .then(response => {
+                    if (response.ok) {
+                        document.getElementById('serverStatus').className = 'status-indicator status-running';
+                        document.getElementById('statusText').textContent = '服务器状态: 运行中 ✓';
+                    } else {
+                        throw new Error('Server error');
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('serverStatus').className = 'status-indicator status-stopped';
+                    document.getElementById('statusText').textContent = '服务器状态: 未启动 ✗';
+                });
+        }
+        
+        // 定期检查服务器状态
+        setInterval(checkServerStatus, 3000);
+        checkServerStatus();
+        
+        // Tab切换功能
+        function switchTab(tabName) {
+            // 隐藏所有tab内容
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            // 移除所有tab的active状态
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            // 显示选中的tab内容
+            document.getElementById(tabName).classList.add('active');
+            // 设置选中tab的active状态
+            event.target.classList.add('active');
+        }
+        
+        // 通用请求函数
+        async function makeRequest(url, method = 'GET', data = null) {
+            const options = {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            
+            if (data) {
+                options.body = JSON.stringify(data);
+            }
+            
+            try {
+                const response = await fetch(url, options);
+                const result = await response.json();
+                return {
+                    success: response.ok,
+                    data: result,
+                    status: response.status
+                };
+            } catch (error) {
+                return {
+                    success: false,
+                    data: { message: '网络错误: ' + error.message },
+                    status: 0
+                };
+            }
+        }
+        
+        // 显示结果
+        function showResult(elementId, result, isSuccess = true) {
+            const element = document.getElementById(elementId);
+            element.textContent = JSON.stringify(result, null, 2);
+            element.className = 'result ' + (isSuccess ? 'success' : 'error');
+        }
+        
+        // 清空结果
+        function clearResult(elementId) {
+            document.getElementById(elementId).textContent = '';
+            document.getElementById(elementId).className = 'result';
+        }
+        
+        // 用户管理相关函数
+        async function getAllUsers() {
+            const result = await makeRequest(BASE_URL + '/users');
+            showResult('users-result', result.data, result.success);
+        }
+        
+        async function createUser() {
+            const userData = {
+                username: document.getElementById('new-username').value,
+                password: document.getElementById('new-password').value,
+                realName: document.getElementById('new-realname').value,
+                phone: document.getElementById('new-phone').value,
+                email: document.getElementById('new-email').value,
+                userType: parseInt(document.getElementById('new-usertype').value),
+                status: 1
+            };
+            
+            const result = await makeRequest(BASE_URL + '/users', 'POST', userData);
+            showResult('create-user-result', result.data, result.success);
+        }
+        
+        // 课程管理相关函数
+        async function getAllCourses() {
+            const result = await makeRequest(BASE_URL + '/courses');
+            showResult('courses-result', result.data, result.success);
+        }
+        
+        async function createCourse() {
+            const courseData = {
+                courseName: document.getElementById('new-course-name').value,
+                courseCode: document.getElementById('new-course-code').value,
+                description: document.getElementById('new-course-desc').value,
+                teacherId: parseInt(document.getElementById('new-teacher-id').value),
+                gradeLevel: parseInt(document.getElementById('new-grade-level').value),
+                subjectId: parseInt(document.getElementById('new-subject-id').value),
+                credit: parseFloat(document.getElementById('new-credit').value),
+                status: 1
+            };
+            
+            const result = await makeRequest(BASE_URL + '/courses', 'POST', courseData);
+            showResult('create-course-result', result.data, result.success);
+        }
+        
+        // 学习中心相关函数
+        async function getStudentRecords() {
+            const studentId = document.getElementById('student-id').value;
+            const result = await makeRequest(BASE_URL + `/learning/records/student/${studentId}`);
+            showResult('learning-result', result.data, result.success);
+        }
+        
+        async function getStudentStatistics() {
+            const studentId = document.getElementById('student-id').value;
+            const result = await makeRequest(BASE_URL + `/learning/statistics/student/${studentId}`);
+            showResult('learning-result', result.data, result.success);
+        }
+        
+        async function createLearningRecord() {
+            const recordData = {
+                studentId: parseInt(document.getElementById('record-student-id').value),
+                courseId: parseInt(document.getElementById('record-course-id').value),
+                lessonId: 1,
+                studyDuration: parseInt(document.getElementById('record-duration').value),
+                progress: parseInt(document.getElementById('record-progress').value),
+                isCompleted: false,
+                lastStudyTime: new Date().toISOString()
+            };
+            
+            const result = await makeRequest(BASE_URL + '/learning/record', 'POST', recordData);
+            showResult('create-record-result', result.data, result.success);
+        }
+    </script>
+</body>
+</html>

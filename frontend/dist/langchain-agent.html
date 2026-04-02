@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LangChain智能体 - 智慧教育平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: linear-gradient(90deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            padding: 20px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .container {
+            flex: 1;
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+            overflow: hidden;
+        }
+        
+        .chat-panel {
+            flex: 3;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            padding: 20px;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        
+        .chat-header h2 {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+        
+        .chat-header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 15px;
+            border-radius: 12px;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-message {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .ai-message {
+            align-self: flex-start;
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #e9ecef;
+            border-bottom-left-radius: 4px;
+        }
+        
+        .system-message {
+            align-self: center;
+            background: #e3f2fd;
+            color: #1976d2;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            text-align: center;
+            max-width: 90%;
+        }
+        
+        .message-time {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-top: 5px;
+            text-align: right;
+        }
+        
+        .chat-input {
+            padding: 20px;
+            border-top: 1px solid #eee;
+            background: white;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .input-group textarea {
+            flex: 1;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            resize: none;
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group textarea:focus {
+            border-color: #4facfe;
+        }
+        
+        .input-group button {
+            padding: 0 25px;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: transform 0.2s;
+        }
+        
+        .input-group button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .input-group button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .sidebar {
+            flex: 1;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow-y: auto;
+        }
+        
+        .sidebar-section {
+            padding: 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .sidebar-section:last-child {
+            border-bottom: none;
+        }
+        
+        .sidebar-section h3 {
+            font-size: 1.1rem;
+            color: #1a1a2e;
+            margin-bottom: 15px;
+        }
+        
+        .feature-tag {
+            display: inline-block;
+            padding: 5px 12px;
+            background: #e3f2fd;
+            color: #1976d2;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin: 3px;
+        }
+        
+        .status-grid {
+            display: grid;
+            gap: 12px;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .status-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .status-value {
+            font-weight: 500;
+            color: #11998e;
+        }
+        
+        .quick-questions {
+            display: grid;
+            gap: 10px;
+        }
+        
+        .quick-question {
+            padding: 12px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        
+        .quick-question:hover {
+            background: #e3f2fd;
+            border-color: #4facfe;
+            transform: translateY(-2px);
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4facfe;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+        
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #8892b0;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🤖 LangChain智能学习助手</h1>
+        <p>基于LangChain4j的下一代AI教育助手 | 支持自然对话、上下文记忆、工具调用</p>
+    </div>
+    
+    <div class="container">
+        <div class="chat-panel">
+            <div class="chat-header">
+                <h2>智能对话</h2>
+                <p>与AI助手进行自然语言交流，获得学习帮助</p>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="message system-message">
+                    🚀 欢迎使用基于LangChain4j的智能学习助手！
+                    <br><br>
+                    我可以帮您：
+                    <br>• 解答学习疑问
+                    <br>• 推荐合适课程  
+                    <br>• 分析学习进度
+                    <br>• 制定学习计划
+                    <br><br>
+                    请随时提出您的问题！
+                </div>
+            </div>
+            
+            <div class="chat-input">
+                <div class="input-group">
+                    <textarea id="questionInput" placeholder="请输入您的学习相关问题..." rows="3"></textarea>
+                    <button id="sendButton" onclick="sendMessage()">发送</button>
+                </div>
+                <div style="margin-top: 10px; display: flex; gap: 10px;">
+                    <button onclick="clearChat()" style="padding: 8px 15px; background: #f8f9fa; color: #666; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">清空对话</button>
+                    <button onclick="checkHealth()" style="padding: 8px 15px; background: #e3f2fd; color: #1976d2; border: 1px solid #bbdefb; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">检查服务</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <h3>✨ 核心功能</h3>
+                <div class="feature-tag">🧠 自然语言理解</div>
+                <div class="feature-tag">💾 对话记忆</div>
+                <div class="feature-tag">🔧 工具调用</div>
+                <div class="feature-tag">📊 学习数据分析</div>
+                <div class="feature-tag">🎯 个性化推荐</div>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3>📊 服务状态</h3>
+                <div class="status-grid">
+                    <div class="status-item">
+                        <span class="status-label">LangChain服务:</span>
+                        <span class="status-value" id="langchainStatus">检查中...</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">AI模型:</span>
+                        <span class="status-value" id="modelStatus">就绪</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">工具调用:</span>
+                        <span class="status-value" id="toolsStatus">可用</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">对话记忆:</span>
+                        <span class="status-value" id="memoryStatus">启用</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3>💡 快速提问</h3>
+                <div class="quick-questions">
+                    <div class="quick-question" onclick="quickAsk('如何提高数学成绩？')">如何提高数学成绩？</div>
+                    <div class="quick-question" onclick="quickAsk('推荐一些Python学习资源')">推荐Python学习资源</div>
+                    <div class="quick-question" onclick="quickAsk('制定一个月的学习计划')">制定学习计划</div>
+                    <div class="quick-question" onclick="quickAsk('分析我的学习进度')">分析学习进度</div>
+                    <div class="quick-question" onclick="quickAsk('有哪些高效的学习方法？')">高效学习方法</div>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3>📝 使用说明</h3>
+                <p style="font-size: 0.9rem; color: #666; line-height: 1.5;">
+                    • 支持连续对话和上下文记忆<br>
+                    • 可以询问学习相关任何问题<br>
+                    • 点击右侧快速问题快速开始<br>
+                    • 服务状态实时监控<br>
+                    • 支持工具调用获取实时数据
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userId = 1;
+        let isSending = false;
+        
+        // 发送消息
+        async function sendMessage() {
+            if (isSending) return;
+            
+            const input = document.getElementById('questionInput');
+            const question = input.value.trim();
+            
+            if (!question) return;
+            
+            // 添加用户消息
+            addMessage(question, 'user');
+            input.value = '';
+            
+            // 显示正在输入
+            showTypingIndicator();
+            
+            try {
+                isSending = true;
+                document.getElementById('sendButton').disabled = true;
+                
+                const response = await fetch('/api/langchain/qa', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId: userId,
+                        question: question
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // 移除输入指示器
+                hideTypingIndicator();
+                
+                if (data.code === 200 && data.data.success) {
+                    addMessage(data.data.answer, 'ai');
+                } else {
+                    addMessage('抱歉，服务暂时不可用，请稍后再试。', 'ai');
+                }
+                
+            } catch (error) {
+                hideTypingIndicator();
+                addMessage('网络错误，请检查连接后重试。', 'ai');
+                console.error('发送消息失败:', error);
+            } finally {
+                isSending = false;
+                document.getElementById('sendButton').disabled = false;
+            }
+        }
+        
+        // 快速提问
+        function quickAsk(question) {
+            document.getElementById('questionInput').value = question;
+            sendMessage();
+        }
+        
+        // 添加消息到聊天界面
+        function addMessage(content, type) {
+            const chatContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}-message`;
+            
+            messageDiv.innerHTML = `
+                <div class="message-content">${content.replace(/\n/g, '<br>')}</div>
+                <div class="message-time">${getCurrentTime()}</div>
+            `;
+            
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        // 显示输入指示器
+        function showTypingIndicator() {
+            const chatContainer = document.getElementById('chatMessages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'typing-indicator';
+            typingDiv.id = 'typingIndicator';
+            typingDiv.innerHTML = `
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+                <span>AI助手正在思考...</span>
+            `;
+            chatContainer.appendChild(typingDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        // 隐藏输入指示器
+        function hideTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+        
+        // 清空聊天
+        function clearChat() {
+            const chatContainer = document.getElementById('chatMessages');
+            chatContainer.innerHTML = `
+                <div class="message system-message">
+                    🚀 欢迎使用基于LangChain4j的智能学习助手！
+                    <br><br>
+                    我可以帮您：
+                    <br>• 解答学习疑问
+                    <br>• 推荐合适课程  
+                    <br>• 分析学习进度
+                    <br>• 制定学习计划
+                    <br><br>
+                    请随时提出您的问题！
+                </div>
+            `;
+        }
+        
+        // 检查服务健康状态
+        async function checkHealth() {
+            try {
+                const response = await fetch('/api/langchain/health');
+                const data = await response.json();
+                
+                if (data.code === 200) {
+                    document.getElementById('langchainStatus').textContent = '运行正常';
+                    document.getElementById('langchainStatus').style.color = '#11998e';
+                } else {
+                    throw new Error('服务异常');
+                }
+            } catch (error) {
+                document.getElementById('langchainStatus').textContent = '服务异常';
+                document.getElementById('langchainStatus').style.color = '#e74c3c';
+            }
+        }
+        
+        // 获取当前时间
+        function getCurrentTime() {
+            const now = new Date();
+            return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+        }
+        
+        // 回车发送
+        document.getElementById('questionInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        // 页面加载完成后检查服务状态
+        window.addEventListener('load', function() {
+            checkHealth();
+        });
+    </script>
+</body>
+</html>

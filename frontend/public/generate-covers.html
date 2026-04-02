@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>课程封面生成器</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        canvas {
+            width: 100%;
+            height: 180px;
+        }
+        .info {
+            padding: 15px;
+        }
+        .info h3 {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            color: #1a1a1a;
+        }
+        .info p {
+            margin: 0;
+            font-size: 12px;
+            color: #666;
+        }
+        .btn-container {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        button {
+            padding: 12px 30px;
+            font-size: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .download-btn {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 课程封面生成器</h1>
+        
+        <div class="btn-container">
+            <button onclick="downloadAll()">📥 下载所有封面</button>
+            <button class="download-btn" onclick="regenerate()">🔄 重新生成</button>
+        </div>
+        
+        <div class="grid" id="canvasGrid"></div>
+    </div>
+
+    <script>
+        // 课程数据
+        const courses = [
+            { name: 'Python 编程入门', category: '编程开发', colors: ['#667eea', '#764ba2'] },
+            { name: 'Java 高级开发', category: '编程开发', colors: ['#f093fb', '#f5576c'] },
+            { name: 'Web 前端开发实战', category: '编程开发', colors: ['#4facfe', '#00f2fe'] },
+            { name: '数据分析与可视化', category: '数据科学', colors: ['#43e97b', '#38f9d7'] },
+            { name: '人工智能基础', category: '人工智能', colors: ['#fa709a', '#fee140'] },
+            { name: 'UI/UX 设计精讲', category: '前端开发', colors: ['#a8edea', '#fed6e3'] },
+            { name: '商业数据分析', category: '数据科学', colors: ['#5ee7df', '#b490ca'] },
+            { name: '英语口语提升', category: '语言学习', colors: ['#fccb90', '#d57eeb'] },
+            { name: '机器学习入门', category: '人工智能', colors: ['#e0c3fc', '#8ec5fc'] },
+            { name: 'React 框架实战', category: '编程开发', colors: ['#6a11cb', '#2575fc'] },
+            { name: '数据库原理与应用', category: '计算机科学', colors: ['#cfd9df', '#e2ebf0'] },
+            { name: '网络安全基础', category: '信息安全', colors: ['#11998e', '#38ef7d'] },
+            { name: '云计算技术', category: '计算机科学', colors: ['#fc4a1a', '#f7b733'] },
+            { name: '移动应用开发', category: '编程开发', colors: ['#89f7fe', '#66a6ff'] },
+            { name: '算法设计与分析', category: '计算机科学', colors: ['#cd9cf2', '#f6f3ff'] },
+            { name: '计算机组成原理', category: '计算机科学', colors: ['#e6dada', '#274046'] }
+        ];
+
+        function drawCover(canvas, course) {
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+
+            // 创建渐变背景
+            const gradient = ctx.createLinearGradient(0, 0, width, height);
+            gradient.addColorStop(0, course.colors[0]);
+            gradient.addColorStop(1, course.colors[1]);
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+
+            // 添加装饰性圆形
+            ctx.globalAlpha = 0.1;
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(width * 0.8, height * 0.2, width * 0.15, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(width * 0.2, height * 0.8, width * 0.1, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1.0;
+
+            // 绘制课程名称（自动换行）
+            ctx.font = 'bold 28px "Microsoft YaHei", Arial';
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            const words = course.name;
+            const maxWidth = width - 60;
+            const lineHeight = 36;
+            let x = width / 2;
+            let y = height / 2;
+            
+            // 计算每行字数
+            let line = '';
+            const lines = [];
+            for (let i = 0; i < words.length; i++) {
+                const testLine = line + words[i];
+                const metrics = ctx.measureText(testLine);
+                if (metrics.width > maxWidth && i > 0) {
+                    lines.push(line);
+                    line = words[i];
+                } else {
+                    line = testLine;
+                }
+            }
+            lines.push(line);
+            
+            // 调整 Y 坐标使文字垂直居中
+            y = (height - (lines.length - 1) * lineHeight) / 2;
+            
+            lines.forEach((textLine, index) => {
+                ctx.fillText(textLine, x, y + index * lineHeight);
+            });
+
+            // 绘制分类标签
+            ctx.font = '14px "Microsoft YaHei", Arial';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.textAlign = 'left';
+            ctx.fillText(course.category, 20, height - 20);
+
+            // 添加图标装饰
+            ctx.font = '24px Arial';
+            ctx.fillText('📚', width - 50, height - 20);
+        }
+
+        function generateCovers() {
+            const grid = document.getElementById('canvasGrid');
+            grid.innerHTML = '';
+
+            courses.forEach((course, index) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => downloadSingle(index);
+
+                const canvas = document.createElement('canvas');
+                canvas.width = 600;
+                canvas.height = 360;
+                
+                drawCover(canvas, course);
+                
+                const info = document.createElement('div');
+                info.className = 'info';
+                info.innerHTML = `
+                    <h3>${course.name}</h3>
+                    <p>${course.category}</p>
+                `;
+                
+                card.appendChild(canvas);
+                card.appendChild(info);
+                grid.appendChild(card);
+            });
+        }
+
+        function downloadSingle(index) {
+            const card = document.querySelectorAll('.card')[index];
+            const canvas = card.querySelector('canvas');
+            const link = document.createElement('a');
+            link.download = `cover-${courses[index].name}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        function downloadAll() {
+            courses.forEach((course, index) => {
+                setTimeout(() => {
+                    const card = document.querySelectorAll('.card')[index];
+                    const canvas = card.querySelector('canvas');
+                    const link = document.createElement('a');
+                    link.download = `cover-${course.name.replace(/\s+/g, '-')}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                }, index * 200);
+            });
+        }
+
+        function regenerate() {
+            // 随机打乱颜色
+            courses.forEach(course => {
+                const randomColor1 = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+                const randomColor2 = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+                course.colors = [randomColor1, randomColor2];
+            });
+            generateCovers();
+        }
+
+        // 初始化
+        generateCovers();
+    </script>
+</body>
+</html>

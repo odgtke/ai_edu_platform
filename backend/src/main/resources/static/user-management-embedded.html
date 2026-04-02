@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户管理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+        
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .search-box input, .search-box select {
+            padding: 10px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            outline: none;
+        }
+        
+        .search-box input {
+            flex: 1;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        
+        .btn-success {
+            background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(90deg, #eb3349 0%, #f45c43 100%);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #1a1a2e;
+            font-size: 0.9rem;
+        }
+        
+        td {
+            font-size: 0.9rem;
+            color: #555;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .user-type {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .type-student { background: #e3f2fd; color: #1976d2; }
+        .type-teacher { background: #e8f5e9; color: #388e3c; }
+        .type-admin { background: #fce4ec; color: #c2185b; }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-active { background: #e8f5e9; color: #388e3c; }
+        .status-inactive { background: #ffebee; color: #c62828; }
+        
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+        
+        .action-btn.edit {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .action-btn.delete {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            padding: 20px;
+            background: white;
+        }
+        
+        .pagination button {
+            padding: 8px 15px;
+            border: 1px solid #e0e0e0;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .pagination button:hover:not(:disabled) {
+            background: #f5f5f5;
+        }
+        
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .pagination .page-info {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        /* 模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h3 {
+            color: #1a1a2e;
+            font-size: 1.2rem;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #1a1a2e;
+            font-size: 0.9rem;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #4facfe;
+        }
+        
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="toolbar">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="搜索用户名、姓名...">
+            <select id="typeFilter">
+                <option value="">全部类型</option>
+                <option value="1">学生</option>
+                <option value="2">教师</option>
+                <option value="3">管理员</option>
+            </select>
+            <button class="btn btn-primary" onclick="searchUsers()">🔍 搜索</button>
+        </div>
+        <button class="btn btn-success" onclick="showAddModal()">➕ 添加用户</button>
+    </div>
+    
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>用户名</th>
+                    <th>姓名</th>
+                    <th>类型</th>
+                    <th>状态</th>
+                    <th>创建时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody">
+                <tr>
+                    <td colspan="7" class="empty-state">
+                        <div>📋</div>
+                        <p>正在加载用户数据...</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="pagination">
+            <button onclick="changePage(-1)" id="prevBtn">上一页</button>
+            <span class="page-info">第 <span id="currentPage">1</span> 页，共 <span id="totalPages">1</span> 页</span>
+            <button onclick="changePage(1)" id="nextBtn">下一页</button>
+        </div>
+    </div>
+    
+    <!-- 添加/编辑用户模态框 -->
+    <div class="modal" id="userModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">添加用户</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="userId">
+                <div class="form-group">
+                    <label>用户名 *</label>
+                    <input type="text" id="username" placeholder="请输入用户名">
+                </div>
+                <div class="form-group">
+                    <label>密码 *</label>
+                    <input type="password" id="password" placeholder="请输入密码">
+                </div>
+                <div class="form-group">
+                    <label>真实姓名</label>
+                    <input type="text" id="realName" placeholder="请输入真实姓名">
+                </div>
+                <div class="form-group">
+                    <label>用户类型 *</label>
+                    <select id="userType">
+                        <option value="1">学生</option>
+                        <option value="2">教师</option>
+                        <option value="3">管理员</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>手机号</label>
+                    <input type="text" id="phone" placeholder="请输入手机号">
+                </div>
+                <div class="form-group">
+                    <label>邮箱</label>
+                    <input type="email" id="email" placeholder="请输入邮箱">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeModal()" style="background: #f5f5f5; color: #666;">取消</button>
+                <button class="btn btn-primary" onclick="saveUser()">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentPage = 1;
+        let totalPages = 1;
+        let editingId = null;
+        
+        // 模拟用户数据
+        const mockUsers = [
+            { id: 1, username: 'zhangsan', realName: '张三', userType: 1, status: 1, createTime: '2024-01-15 09:30:00' },
+            { id: 2, username: 'lisi', realName: '李四', userType: 2, status: 1, createTime: '2024-01-14 14:20:00' },
+            { id: 3, username: 'wangwu', realName: '王五', userType: 1, status: 1, createTime: '2024-01-13 11:45:00' },
+            { id: 4, username: 'zhaoliu', realName: '赵六', userType: 3, status: 1, createTime: '2024-01-12 16:00:00' },
+            { id: 5, username: 'student01', realName: '小明', userType: 1, status: 1, createTime: '2024-01-11 10:15:00' },
+            { id: 6, username: 'teacher01', realName: '李老师', userType: 2, status: 1, createTime: '2024-01-10 09:00:00' },
+            { id: 7, username: 'student02', realName: '小红', userType: 1, status: 1, createTime: '2024-01-09 14:30:00' },
+            { id: 8, username: 'admin01', realName: '管理员', userType: 3, status: 1, createTime: '2024-01-08 08:00:00' },
+            { id: 9, username: 'student03', realName: '小刚', userType: 1, status: 1, createTime: '2024-01-07 15:45:00' },
+            { id: 10, username: 'teacher02', realName: '王老师', userType: 2, status: 1, createTime: '2024-01-06 11:20:00' },
+            { id: 11, username: 'student04', realName: '小丽', userType: 1, status: 1, createTime: '2024-01-05 13:10:00' },
+            { id: 12, username: 'student05', realName: '小华', userType: 1, status: 1, createTime: '2024-01-04 16:30:00' },
+            { id: 13, username: 'teacher03', realName: '张老师', userType: 2, status: 1, createTime: '2024-01-03 09:15:00' },
+            { id: 14, username: 'student06', realName: '小芳', userType: 1, status: 1, createTime: '2024-01-02 10:30:00' },
+            { id: 15, username: 'student07', realName: '小杰', userType: 1, status: 1, createTime: '2024-01-01 14:00:00' },
+            { id: 16, username: 'admin02', realName: '超级管理员', userType: 3, status: 1, createTime: '2023-12-31 08:45:00' },
+            { id: 17, username: 'teacher04', realName: '刘老师', userType: 2, status: 1, createTime: '2023-12-30 11:20:00' },
+            { id: 18, username: 'student08', realName: '小燕', userType: 1, status: 1, createTime: '2023-12-29 15:10:00' },
+            { id: 19, username: 'student09', realName: '小波', userType: 1, status: 1, createTime: '2023-12-28 09:30:00' },
+            { id: 20, username: 'teacher05', realName: '陈老师', userType: 2, status: 1, createTime: '2023-12-27 13:45:00' },
+            { id: 21, username: 'student10', realName: '小静', userType: 1, status: 1, createTime: '2023-12-26 16:20:00' },
+            { id: 22, username: 'student11', realName: '小超', userType: 1, status: 0, createTime: '2023-12-25 10:00:00' }
+        ];
+        
+        // 加载用户列表
+        async function loadUsers() {
+            try {
+                const search = document.getElementById('searchInput').value;
+                const type = document.getElementById('typeFilter').value;
+                
+                let url = `/users/page?page=${currentPage}&size=10`;
+                if (search) url += `&username=${encodeURIComponent(search)}`;
+                if (type) url += `&userType=${type}`;
+                
+                const response = await fetch(url);
+                const result = await response.json();
+                
+                if (result.code === 200 && result.data.records && result.data.records.length > 0) {
+                    renderUsers(result.data.records);
+                    totalPages = result.data.pages;
+                    updatePagination();
+                } else {
+                    // 使用模拟数据
+                    useMockUsers(search, type);
+                }
+            } catch (error) {
+                console.log('使用模拟用户数据');
+                const search = document.getElementById('searchInput').value;
+                const type = document.getElementById('typeFilter').value;
+                useMockUsers(search, type);
+            }
+        }
+        
+        // 使用模拟用户数据
+        function useMockUsers(search, type) {
+            let filteredUsers = [...mockUsers];
+            
+            // 搜索过滤
+            if (search) {
+                filteredUsers = filteredUsers.filter(u => 
+                    u.username.includes(search) || 
+                    (u.realName && u.realName.includes(search))
+                );
+            }
+            
+            // 类型过滤
+            if (type) {
+                filteredUsers = filteredUsers.filter(u => u.userType == type);
+            }
+            
+            // 分页
+            const pageSize = 10;
+            const start = (currentPage - 1) * pageSize;
+            const end = start + pageSize;
+            const pageUsers = filteredUsers.slice(start, end);
+            
+            renderUsers(pageUsers);
+            totalPages = Math.ceil(filteredUsers.length / pageSize) || 1;
+            updatePagination();
+        }
+        
+        // 更新分页
+        function updatePagination() {
+            document.getElementById('currentPage').textContent = currentPage;
+            document.getElementById('totalPages').textContent = totalPages;
+            document.getElementById('prevBtn').disabled = currentPage <= 1;
+            document.getElementById('nextBtn').disabled = currentPage >= totalPages;
+        }
+        
+        // 渲染用户列表
+        function renderUsers(users) {
+            const tbody = document.getElementById('userTableBody');
+            
+            if (!users || users.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="empty-state">
+                            <div>📭</div>
+                            <p>暂无用户数据</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = users.map(user => `
+                <tr>
+                    <td>${user.id}</td>
+                    <td>${user.username}</td>
+                    <td>${user.realName || '-'}</td>
+                    <td><span class="user-type type-${getTypeClass(user.userType)}">${getTypeText(user.userType)}</span></td>
+                    <td><span class="status-badge status-${user.status === 1 ? 'active' : 'inactive'}">${user.status === 1 ? '正常' : '禁用'}</span></td>
+                    <td>${formatDate(user.createTime)}</td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="action-btn edit" onclick="editUser(${user.id})">编辑</button>
+                            <button class="action-btn delete" onclick="deleteUser(${user.id})">删除</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        // 获取类型样式
+        function getTypeClass(type) {
+            const map = { 1: 'student', 2: 'teacher', 3: 'admin' };
+            return map[type] || 'student';
+        }
+        
+        // 获取类型文本
+        function getTypeText(type) {
+            const map = { 1: '学生', 2: '教师', 3: '管理员' };
+            return map[type] || '未知';
+        }
+        
+        // 格式化日期
+        function formatDate(date) {
+            if (!date) return '-';
+            const d = new Date(date);
+            return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
+        }
+        
+        // 搜索用户
+        function searchUsers() {
+            currentPage = 1;
+            loadUsers();
+        }
+        
+        // 切换页面
+        function changePage(delta) {
+            currentPage += delta;
+            loadUsers();
+        }
+        
+        // 显示添加模态框
+        function showAddModal() {
+            editingId = null;
+            document.getElementById('modalTitle').textContent = '添加用户';
+            document.getElementById('userId').value = '';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('realName').value = '';
+            document.getElementById('userType').value = '1';
+            document.getElementById('phone').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('userModal').classList.add('active');
+        }
+        
+        // 编辑用户
+        async function editUser(id) {
+            try {
+                const response = await fetch(`/users/${id}`);
+                const result = await response.json();
+                
+                if (result.code === 200) {
+                    const user = result.data;
+                    editingId = id;
+                    document.getElementById('modalTitle').textContent = '编辑用户';
+                    document.getElementById('userId').value = user.id;
+                    document.getElementById('username').value = user.username;
+                    document.getElementById('password').value = '';
+                    document.getElementById('realName').value = user.realName || '';
+                    document.getElementById('userType').value = user.userType;
+                    document.getElementById('phone').value = user.phone || '';
+                    document.getElementById('email').value = user.email || '';
+                    document.getElementById('userModal').classList.add('active');
+                }
+            } catch (error) {
+                alert('获取用户信息失败');
+            }
+        }
+        
+        // 保存用户
+        async function saveUser() {
+            const user = {
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value,
+                realName: document.getElementById('realName').value,
+                userType: parseInt(document.getElementById('userType').value),
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value,
+                status: 1
+            };
+            
+            if (!user.username) {
+                alert('请输入用户名');
+                return;
+            }
+            if (!editingId && !user.password) {
+                alert('请输入密码');
+                return;
+            }
+            
+            try {
+                const url = editingId ? `/users/${editingId}` : '/users';
+                const method = editingId ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(user)
+                });
+                
+                const result = await response.json();
+                
+                if (result.code === 200) {
+                    closeModal();
+                    loadUsers();
+                    alert(editingId ? '更新成功' : '添加成功');
+                } else {
+                    alert(result.message || '操作失败');
+                }
+            } catch (error) {
+                alert('网络错误');
+            }
+        }
+        
+        // 删除用户
+        async function deleteUser(id) {
+            if (!confirm('确定要删除该用户吗？')) return;
+            
+            try {
+                const response = await fetch(`/users/${id}`, { method: 'DELETE' });
+                const result = await response.json();
+                
+                if (result.code === 200) {
+                    loadUsers();
+                    alert('删除成功');
+                } else {
+                    alert(result.message || '删除失败');
+                }
+            } catch (error) {
+                alert('网络错误');
+            }
+        }
+        
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('userModal').classList.remove('active');
+        }
+        
+        // 页面加载
+        document.addEventListener('DOMContentLoaded', loadUsers);
+    </script>
+</body>
+</html>

@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个性推荐系统 - 智慧教育平台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            background: transparent;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab:hover:not(.active) {
+            background: #f0f0f0;
+        }
+
+        .content-section {
+            display: none;
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .recommendations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .course-card {
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .course-image {
+            height: 160px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3em;
+        }
+
+        .course-info {
+            padding: 20px;
+        }
+
+        .course-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .course-description {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .course-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .course-score {
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .course-type {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+        }
+
+        .recommendation-reason {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 0.85em;
+            color: #666;
+            border-left: 3px solid #667eea;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .preferences-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+
+        .preference-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .preference-label {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .preference-slider {
+            width: 150px;
+            margin: 0 15px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .back-button {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 20px;
+            transition: background 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: #5a6268;
+        }
+
+        .refresh-button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            float: right;
+            transition: background 0.3s ease;
+        }
+
+        .refresh-button:hover {
+            background: #218838;
+        }
+
+        .path-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+        }
+
+        .path-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .path-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .path-hours {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+        }
+
+        .path-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .path-progress {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 0.85em;
+            color: #666;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-star"></i> 个性推荐系统</h1>
+            <p>基于您的学习行为和偏好，为您智能推荐最适合的课程</p>
+        </div>
+
+        <button class="back-button" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i> 返回主页
+        </button>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('all')">全部推荐</button>
+            <button class="tab" onclick="switchTab('content')">内容推荐</button>
+            <button class="tab" onclick="switchTab('collaborative')">协同推荐</button>
+            <button class="tab" onclick="switchTab('trending')">热门推荐</button>
+            <button class="tab" onclick="switchTab('paths')">学习路径</button>
+            <button class="tab" onclick="switchTab('preferences')">我的偏好</button>
+        </div>
+
+        <!-- 全部推荐 -->
+        <div id="all-tab" class="content-section active">
+            <div class="header-section">
+                <h2>个性化推荐 <span class="refresh-button" onclick="loadRecommendations()"><i class="fas fa-sync-alt"></i> 刷新</span></h2>
+                <p>结合多种算法为您精心挑选的课程推荐</p>
+            </div>
+            <div id="recommendationsContainer" class="recommendations-grid">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    正在为您生成个性化推荐...
+                </div>
+            </div>
+        </div>
+
+        <!-- 内容推荐 -->
+        <div id="content-tab" class="content-section">
+            <div class="header-section">
+                <h2>内容推荐 <span class="refresh-button" onclick="loadRecommendationsByType('content')"><i class="fas fa-sync-alt"></i> 刷新</span></h2>
+                <p>基于您的学习偏好和课程内容的精准推荐</p>
+            </div>
+            <div id="contentRecommendations" class="recommendations-grid">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    正在加载内容推荐...
+                </div>
+            </div>
+        </div>
+
+        <!-- 协同推荐 -->
+        <div id="collaborative-tab" class="content-section">
+            <div class="header-section">
+                <h2>协同推荐 <span class="refresh-button" onclick="loadRecommendationsByType('collaborative')"><i class="fas fa-sync-alt"></i> 刷新</span></h2>
+                <p>基于相似用户行为模式的智能推荐</p>
+            </div>
+            <div id="collaborativeRecommendations" class="recommendations-grid">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    正在加载协同推荐...
+                </div>
+            </div>
+        </div>
+
+        <!-- 热门推荐 -->
+        <div id="trending-tab" class="content-section">
+            <div class="header-section">
+                <h2>热门推荐 <span class="refresh-button" onclick="loadTrendingCourses()"><i class="fas fa-sync-alt"></i> 刷新</span></h2>
+                <p>当前最受欢迎的学习课程</p>
+            </div>
+            <div id="trendingCourses" class="recommendations-grid">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    正在加载热门课程...
+                </div>
+            </div>
+        </div>
+
+        <!-- 学习路径 -->
+        <div id="paths-tab" class="content-section">
+            <div class="header-section">
+                <h2>推荐学习路径 <span class="refresh-button" onclick="loadLearningPaths()"><i class="fas fa-sync-alt"></i> 刷新</span></h2>
+                <p>为您量身定制的系统性学习计划</p>
+            </div>
+            <div id="learningPaths">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    正在生成学习路径...
+                </div>
+            </div>
+        </div>
+
+        <!-- 我的偏好 -->
+        <div id="preferences-tab" class="content-section">
+            <div class="header-section">
+                <h2>学习偏好设置</h2>
+                <p>调整您的学习偏好，让推荐更加精准</p>
+            </div>
+            
+            <div class="preferences-section">
+                <h3><i class="fas fa-sliders-h"></i> 课程类别偏好</h3>
+                <div class="preference-item">
+                    <span class="preference-label">编程开发</span>
+                    <input type="range" class="preference-slider" min="0" max="100" value="80" onchange="updatePreference('course_category', '编程开发', this.value)">
+                    <span id="prog-value">80%</span>
+                </div>
+                <div class="preference-item">
+                    <span class="preference-label">人工智能</span>
+                    <input type="range" class="preference-slider" min="0" max="100" value="70" onchange="updatePreference('course_category', '人工智能', this.value)">
+                    <span id="ai-value">70%</span>
+                </div>
+                <div class="preference-item">
+                    <span class="preference-label">数据分析</span>
+                    <input type="range" class="preference-slider" min="0" max="100" value="60" onchange="updatePreference('course_category', '数据分析', this.value)">
+                    <span id="data-value">60%</span>
+                </div>
+            </div>
+
+            <div class="preferences-section">
+                <h3><i class="fas fa-chart-line"></i> 难度偏好</h3>
+                <div class="preference-item">
+                    <span class="preference-label">初级课程</span>
+                    <input type="range" class="preference-slider" min="0" max="100" value="30" onchange="updatePreference('difficulty_level', '初级', this.value)">
+                    <span id="beginner-value">30%</span>
+                </div>
+                <div class="preference-item">
+                    <span class="preference-label">中级课程</span>
+                    <input type="range" class="preference-slider" min="0" max="100" value="70" onchange="updatePreference('difficulty_level', '中级', this.value)">
+                    <span id="intermediate-value">70%</span>
+                </div>
+                <div class="preference-item">
+                    <span class="preference-label">高级课程</span>
+                    <input type="range" class="preference-slider" min="0" max="100" value="40" onchange="updatePreference('difficulty_level', '高级', this.value)">
+                    <span id="advanced-value">40%</span>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalRec">50</div>
+                    <div class="stat-label">总推荐数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="clickRate">30%</div>
+                    <div class="stat-label">点击率</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="enrollRate">16%</div>
+                    <div class="stat-label">报名率</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="lastUpdate">刚刚</div>
+                    <div class="stat-label">上次更新</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8081';
+        const currentUserId = 1; // 示例用户ID
+        let currentTab = 'all';
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadRecommendations();
+            loadRecommendationStatistics();
+        });
+
+        // 切换标签页
+        function switchTab(tabName) {
+            currentTab = tabName;
+            
+            // 更新标签样式
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // 显示对应内容
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            // 根据标签加载相应数据
+            switch(tabName) {
+                case 'all':
+                    loadRecommendations();
+                    break;
+                case 'content':
+                    loadRecommendationsByType('content');
+                    break;
+                case 'collaborative':
+                    loadRecommendationsByType('collaborative');
+                    break;
+                case 'trending':
+                    loadTrendingCourses();
+                    break;
+                case 'paths':
+                    loadLearningPaths();
+                    break;
+            }
+        }
+
+        // 加载个性化推荐
+        async function loadRecommendations() {
+            const container = document.getElementById('recommendationsContainer');
+            container.innerHTML = '<div class="loading"><div class="loading-spinner"></div>正在为您生成个性化推荐...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/recommendations/personalized?userId=${currentUserId}&limit=12`);
+                const result = await response.json();
+                
+                if (result.code === 200 && result.data) {
+                    renderRecommendations(result.data, container);
+                } else {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📚</div>
+                            <p>暂无推荐课程，请先设置您的学习偏好</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading recommendations:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠️</div>
+                        <p>加载失败，请稍后重试</p>
+                    </div>
+                `;
+            }
+        }
+
+        // 按类型加载推荐
+        async function loadRecommendationsByType(type) {
+            const containerId = `${type}Recommendations`;
+            const container = document.getElementById(containerId);
+            container.innerHTML = `<div class="loading"><div class="loading-spinner"></div>正在加载${getTypeName(type)}推荐...</div>`;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/recommendations/by-type?userId=${currentUserId}&type=${type}&limit=12`);
+                const result = await response.json();
+                
+                if (result.code === 200 && result.data) {
+                    renderRecommendations(result.data, container);
+                } else {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📚</div>
+                            <p>暂无${getTypeName(type)}推荐</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error(`Error loading ${type} recommendations:`, error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠️</div>
+                        <p>加载失败，请稍后重试</p>
+                    </div>
+                `;
+            }
+        }
+
+        // 加载热门课程
+        async function loadTrendingCourses() {
+            const container = document.getElementById('trendingCourses');
+            container.innerHTML = '<div class="loading"><div class="loading-spinner"></div>正在加载热门课程...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/recommendations/trending?limit=12`);
+                const result = await response.json();
+                
+                if (result.code === 200 && result.data) {
+                    renderRecommendations(result.data, container);
+                } else {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🔥</div>
+                            <p>暂无热门课程数据</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading trending courses:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠️</div>
+                        <p>加载失败，请稍后重试</p>
+                    </div>
+                `;
+            }
+        }
+
+        // 加载学习路径
+        async function loadLearningPaths() {
+            const container = document.getElementById('learningPaths');
+            container.innerHTML = '<div class="loading"><div class="loading-spinner"></div>正在生成学习路径...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/recommendations/learning-paths?userId=${currentUserId}`);
+                const result = await response.json();
+                
+                if (result.code === 200 && result.data) {
+                    renderLearningPaths(result.data);
+                } else {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🛣️</div>
+                            <p>暂无推荐的学习路径</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading learning paths:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠️</div>
+                        <p>加载失败，请稍后重试</p>
+                    </div>
+                `;
+            }
+        }
+
+        // 渲染推荐课程
+        function renderRecommendations(recommendations, container) {
+            if (recommendations.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📚</div>
+                        <p>暂无推荐课程</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const html = recommendations.map(course => `
+                <div class="course-card" onclick="viewCourse(${course.courseId})">
+                    <div class="course-image">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="course-info">
+                        <h3 class="course-title">课程 #${course.courseId}</h3>
+                        <p class="course-description">${course.reason || '智能推荐的优质课程'}</p>
+                        <div class="course-meta">
+                            <span class="course-score">${course.score ? course.score.toFixed(1) : '85.0'}分</span>
+                            <span class="course-type">${getTypeLabel(course.recommendationType)}</span>
+                        </div>
+                        <div class="recommendation-reason">
+                            <i class="fas fa-lightbulb"></i> ${course.reason || '基于算法推荐'}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = html;
+        }
+
+        // 渲染学习路径
+        function renderLearningPaths(paths) {
+            const container = document.getElementById('learningPaths');
+            
+            if (paths.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🛣️</div>
+                        <p>暂无推荐的学习路径</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const html = paths.map(path => `
+                <div class="path-card">
+                    <div class="path-header">
+                        <h3 class="path-title">${path.pathName || '学习路径'}</h3>
+                        <span class="path-hours">${path.estimatedHours || 40}学时</span>
+                    </div>
+                    <p class="path-description">${path.description || '系统性的学习计划'}</p>
+                    <div class="path-progress">
+                        <div class="progress-bar" style="width: ${(path.completedCount || 0) * 10}%"></div>
+                    </div>
+                    <div class="progress-text">已完成 ${path.completedCount || 0} 个阶段</div>
+                </div>
+            `).join('');
+
+            container.innerHTML = html;
+        }
+
+        // 加载推荐统计
+        async function loadRecommendationStatistics() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/recommendations/statistics?userId=${currentUserId}`);
+                const result = await response.json();
+                
+                if (result.code === 200 && result.data) {
+                    const stats = result.data;
+                    document.getElementById('totalRec').textContent = stats.totalRecommendations || 50;
+                    document.getElementById('clickRate').textContent = stats.clickThroughRate || '30%';
+                    document.getElementById('enrollRate').textContent = '16%'; // 示例数据
+                    document.getElementById('lastUpdate').textContent = '刚刚';
+                }
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+            }
+        }
+
+        // 更新用户偏好
+        async function updatePreference(type, value, score) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/recommendations/preference`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `userId=${currentUserId}&preferenceType=${type}&preferenceValue=${encodeURIComponent(value)}&score=${score/100}`
+                });
+                
+                const result = await response.json();
+                if (result.code === 200) {
+                    console.log('偏好更新成功');
+                    // 更新显示的百分比
+                    const valueElement = document.getElementById(getValueElementId(type, value));
+                    if (valueElement) {
+                        valueElement.textContent = score + '%';
+                    }
+                }
+            } catch (error) {
+                console.error('Error updating preference:', error);
+            }
+        }
+
+        // 辅助函数
+        function getTypeName(type) {
+            const names = {
+                'content': '内容',
+                'collaborative': '协同',
+                'trending': '热门'
+            };
+            return names[type] || type;
+        }
+
+        function getTypeLabel(type) {
+            const labels = {
+                'content_based': '内容推荐',
+                'collaborative_filtering': '协同推荐',
+                'trending': '热门推荐',
+                'knowledge_based': '知识推荐'
+            };
+            return labels[type] || '智能推荐';
+        }
+
+        function getValueElementId(type, value) {
+            const ids = {
+                'course_category_编程开发': 'prog-value',
+                'course_category_人工智能': 'ai-value',
+                'course_category_数据分析': 'data-value',
+                'difficulty_level_初级': 'beginner-value',
+                'difficulty_level_中级': 'intermediate-value',
+                'difficulty_level_高级': 'advanced-value'
+            };
+            return ids[`${type}_${value}`] || '';
+        }
+
+        // 查看课程详情
+        function viewCourse(courseId) {
+            alert(`查看课程详情: ${courseId}\n此功能将在后续版本中实现`);
+            // 这里可以跳转到课程详情页面
+        }
+
+        // 返回主页
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
