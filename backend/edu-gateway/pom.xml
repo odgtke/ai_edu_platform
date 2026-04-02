@@ -48,12 +48,6 @@
             <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
         </dependency>
 
-        <!-- 配置中心 -->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-config</artifactId>
-        </dependency>
-
         <!-- 依赖公共模块 -->
         <dependency>
             <groupId>com.chinaunicom</groupId>

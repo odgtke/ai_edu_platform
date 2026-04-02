@@ -5,70 +5,39 @@ spring:
   application:
     name: edu-learning-service
   
-  # 数据源配置
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/edu_platform?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
-    username: root
-    password: Pan!0417
-    hikari:
-      minimum-idle: 5
-      maximum-pool-size: 20
-      idle-timeout: 300000
-      max-lifetime: 1200000
-      connection-timeout: 20000
-
-  # Redis配置
-  redis:
-    host: localhost
-    port: 6379
-    database: 0
-    timeout: 2000ms
-    lettuce:
-      pool:
-        max-active: 8
-        max-idle: 8
-        min-idle: 0
-
-  # 任务调度
-  task:
-    scheduling:
-      pool:
-        size: 5
-
-  # Nacos配置
+  # Nacos配置中心
   cloud:
     nacos:
       discovery:
         server-addr: 127.0.0.1:8848
         username: nacos
         password: nacos
-        namespace: public
+        namespace: edu
         group: DEFAULT_GROUP
       config:
-        enabled: false
-        import-check:
-          enabled: false
+        server-addr: 127.0.0.1:8848
+        username: nacos
+        password: nacos
+        namespace: edu
+        group: DEFAULT_GROUP
+        file-extension: yml
+        refresh-enabled: true
+        # 共享配置
+        shared-configs:
+          - data-id: common-config.yml
+            group: DEFAULT_GROUP
+            refresh: true
+        # 扩展配置（服务专属配置）
+        extension-configs:
+          - data-id: edu-learning-service.yml
+            group: DEFAULT_GROUP
+            refresh: true
     config:
       import-check:
         enabled: false
 
-# MyBatis Plus配置
-mybatis-plus:
-  configuration:
-    map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-  global-config:
-    db-config:
-      logic-delete-field: is_deleted
-      logic-delete-value: 1
-      logic-not-delete-value: 0
-      id-type: auto
-  mapper-locations: classpath*:/mapper/**/*.xml
-
-# 日志配置
-logging:
-  level:
-    com.chinaunicom.edu.learning: DEBUG
-    com.baomidou.mybatisplus: DEBUG
-    com.alibaba.nacos: INFO
+  # 从Nacos加载配置
+  config:
+    import:
+      - optional:nacos:common-config.yml
+      - optional:nacos:edu-learning-service.yml
