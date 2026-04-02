@@ -10,7 +10,7 @@
     <version>1.0.0</version>
     <packaging>pom</packaging>
 
-    <name>智慧教育平台微服务</name>
+    <name>Edu Platform Microservices</name>
     <description>智慧教育平台 Spring Cloud 微服务架构</description>
 
     <!-- Spring Boot 父项目 -->

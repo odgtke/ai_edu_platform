@@ -14,7 +14,7 @@
     <artifactId>edu-common</artifactId>
     <packaging>jar</packaging>
 
-    <name>通用模块</name>
+    <name>Common Module</name>
     <description>微服务通用组件和工具类</description>
 
     <build>

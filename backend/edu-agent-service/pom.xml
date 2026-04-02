@@ -14,7 +14,7 @@
     <artifactId>edu-agent-service</artifactId>
     <packaging>jar</packaging>
 
-    <name>智能体服务</name>
+    <name>Agent Service</name>
     <description>AI智能体、NLP处理、知识库</description>
 
     <dependencies>

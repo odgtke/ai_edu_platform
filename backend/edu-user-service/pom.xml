@@ -14,7 +14,7 @@
     <artifactId>edu-user-service</artifactId>
     <packaging>jar</packaging>
 
-    <name>用户服务</name>
+    <name>User Service</name>
     <description>用户管理、认证授权、班级年级管理</description>
 
     <dependencies>

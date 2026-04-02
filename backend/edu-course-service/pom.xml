@@ -14,7 +14,7 @@
     <artifactId>edu-course-service</artifactId>
     <packaging>jar</packaging>
 
-    <name>课程服务</name>
+    <name>Course Service</name>
     <description>课程管理、资源管理、推荐系统</description>
 
     <dependencies>

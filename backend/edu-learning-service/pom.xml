@@ -14,7 +14,7 @@
     <artifactId>edu-learning-service</artifactId>
     <packaging>jar</packaging>
 
-    <name>学习中心服务</name>
+    <name>Learning Service</name>
     <description>学习记录、作业考试、能力评估</description>
 
     <dependencies>
