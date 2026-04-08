@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chinaunicom.edu.course.mapper.UserBehaviorMapper">
+
+    <!-- 批量插入 -->
+    <insert id="batchInsert">
+        INSERT INTO user_behaviors (user_id, course_id, behavior_type, behavior_value, ip_address, user_agent, created_time)
+        VALUES
+        <foreach collection="behaviors" item="item" separator=",">
+            (#{item.userId}, #{item.courseId}, #{item.behaviorType}, #{item.behaviorValue}, 
+             #{item.ipAddress}, #{item.userAgent}, #{item.createdTime})
+        </foreach>
+    </insert>
+
+</mapper>

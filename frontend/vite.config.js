@@ -9,37 +9,7 @@ export default defineConfig({
     open: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:8081',
-        changeOrigin: true,
-        secure: false
-      },
-      '/users': {
-        target: 'http://localhost:8081',
-        changeOrigin: true,
-        secure: false
-      },
-      '/courses': {
-        target: 'http://localhost:8081',
-        changeOrigin: true,
-        secure: false
-      },
-      '/auth': {
-        target: 'http://localhost:8081',
-        changeOrigin: true,
-        secure: false
-      },
-      '/agent': {
-        target: 'http://localhost:8081',
-        changeOrigin: true,
-        secure: false
-      },
-      '/langchain': {
-        target: 'http://localhost:8081',
-        changeOrigin: true,
-        secure: false
-      },
-      '/learning': {
-        target: 'http://localhost:8081',
+        target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false
       }

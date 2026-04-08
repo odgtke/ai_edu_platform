@@ -29,6 +29,7 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
     @Override
     public boolean save(Course entity) {
         if (entity == null) {
+            log.warn("课程信息不能为空");
             throw new BusinessException(ExceptionEnum.REQUEST_PARAMS_ERROR.getCode(), "课程信息不能为空");
         }
         

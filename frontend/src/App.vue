@@ -4,7 +4,24 @@
     <aside class="sidebar" :class="{ collapsed: isCollapsed }">
       <div class="logo">
         <div class="logo-icon">
-          <el-icon><School /></el-icon>
+          <svg class="platform-logo" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- 外圈圆环 - 代表完整的教育生态 -->
+            <circle cx="24" cy="24" r="22" stroke="white" stroke-width="2" stroke-opacity="0.3"/>
+            <!-- 内圈圆环 -->
+            <circle cx="24" cy="24" r="18" stroke="white" stroke-width="1.5" stroke-opacity="0.5"/>
+            <!-- 书本/学位帽底部 -->
+            <path d="M12 28C12 28 18 32 24 32C30 32 36 28 36 28" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- 书本/学位帽顶部平面 -->
+            <path d="M24 20L12 26L24 32L36 26L24 20Z" fill="white" fill-opacity="0.9"/>
+            <!-- 流苏 -->
+            <path d="M36 26V32" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="36" cy="34" r="2" fill="white"/>
+            <!-- AI 芯片/电路元素 - 代表智能 -->
+            <rect x="20" y="14" width="8" height="4" rx="1" fill="white" fill-opacity="0.8"/>
+            <path d="M22 14V11M26 14V11M24 14V12" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+            <!-- 连接线 -->
+            <path d="M18 22H16M32 22H30" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.7"/>
+          </svg>
         </div>
         <div class="logo-text" v-show="!isCollapsed">
           <h2>智慧教育</h2>
@@ -238,6 +255,12 @@ export default {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+.logo-icon .platform-logo {
+  width: 32px;
+  height: 32px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
 .logo-icon .el-icon {

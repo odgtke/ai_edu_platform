@@ -17,9 +17,9 @@ spring:
       config:
         server-addr: 127.0.0.1:8848
         username: nacos
-        password: nacos
+        password: nacos 
         namespace: edu
-        group: DEFAULT_GROUP
+        group: DEFAULT_GROUP  
         file-extension: yml
         refresh-enabled: true
         # 共享配置

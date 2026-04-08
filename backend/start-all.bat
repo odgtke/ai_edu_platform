@@ -8,7 +8,7 @@ echo 请先确保 Nacos 服务已启动: http://localhost:8848/nacos
 echo.
 
 REM 设置Java环境
-set JAVA_HOME=C:\Program Files\Java\jdk1.8.0_xxx
+set JAVA_HOME=C:\Program Files\Java\jdk-11.0.2
 set PATH=%JAVA_HOME%\bin;%PATH%
 
 REM 启动顺序：Gateway -> 其他服务

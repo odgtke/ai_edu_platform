@@ -4,7 +4,7 @@
     <div class="page-header-modern">
       <div class="header-content">
         <div class="title-badge">
-          <el-icon class="badge-icon"><Star /></el-icon>
+          <el-icon class="badge-icon"><i-ep-star /></el-icon>
         </div>
         <div class="title-text">
           <h1 class="page-title">个性推荐</h1>
@@ -13,7 +13,7 @@
       </div>
       <div class="header-actions">
         <el-button class="btn-refresh" @click="refreshRecommendations">
-          <el-icon><Refresh /></el-icon>
+          <el-icon><i-ep-refresh /></el-icon>
           刷新推荐
         </el-button>
       </div>
@@ -23,7 +23,7 @@
     <div class="stats-section">
       <div class="stat-card">
         <div class="stat-icon blue">
-          <el-icon><Star /></el-icon>
+          <el-icon><i-ep-star /></el-icon>
         </div>
         <div class="stat-info">
           <div class="stat-value">{{ recommendations.length }}</div>
@@ -33,7 +33,7 @@
       
       <div class="stat-card">
         <div class="stat-icon green">
-          <el-icon><TrendCharts /></el-icon>
+          <el-icon><i-ep-trend-charts /></el-icon>
         </div>
         <div class="stat-info">
           <div class="stat-value">{{ avgMatchRate }}%</div>
@@ -43,7 +43,7 @@
       
       <div class="stat-card">
         <div class="stat-icon orange">
-          <el-icon><View /></el-icon>
+          <el-icon><i-ep-view /></el-icon>
         </div>
         <div class="stat-info">
           <div class="stat-value">{{ viewedCount }}</div>
@@ -56,7 +56,7 @@
     <div class="recommendation-section">
       <div class="section-header">
         <h2 class="section-title">
-          <el-icon><MagicStick /></el-icon>
+          <el-icon><i-ep-magic-stick /></el-icon>
           为您推荐
         </h2>
         <el-radio-group v-model="recommendType" size="small">
@@ -90,12 +90,12 @@
         >
           <div class="card-header">
             <div class="match-badge" :style="getMatchStyle(item.score)">
-              <el-icon><CircleCheck /></el-icon>
+              <el-icon><i-ep-circle-check /></el-icon>
               {{ (item.score * 100).toFixed(0) }}% 匹配
             </div>
             <el-dropdown trigger="click">
               <el-button circle size="small" class="more-btn">
-                <el-icon><MoreFilled /></el-icon>
+                <el-icon><i-ep-more-filled /></el-icon>
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
@@ -106,7 +106,7 @@
                     <el-icon><Star /></el-icon>收藏
                   </el-dropdown-item>
                   <el-dropdown-item @click="shareItem(item)">
-                    <el-icon><Share /></el-icon>分享
+                    <el-icon><i-ep-share /></el-icon>分享
                   </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
@@ -119,7 +119,7 @@
             </div>
             <h3 class="course-title">{{ item.courseName }}</h3>
             <p class="course-reason">
-              <el-icon><InfoFilled /></el-icon>
+              <el-icon><i-ep-info-filled /></el-icon>
               {{ item.reason || '基于您的学习历史推荐' }}
             </p>
           </div>
@@ -128,8 +128,11 @@
             <el-button type="primary" @click="viewDetail(item)">
               查看详情
             </el-button>
-            <el-button @click="recordBehavior(item, 'like')">
-              <el-icon><ThumbUp /></el-icon>
+            <el-button 
+              :type="likedCourses.has(item.courseId) ? 'primary' : 'default'"
+              @click="toggleLike(item)"
+            >
+              {{ likedCourses.has(item.courseId) ? '❤️ 已赞' : '👍 点赞' }}
             </el-button>
           </div>
         </el-card>
@@ -140,7 +143,7 @@
     <div class="trending-section">
       <div class="section-header">
         <h2 class="section-title">
-          <el-icon><Fire /></el-icon>
+          <el-icon><i-ep-star /></el-icon>
           热门课程
         </h2>
       </div>
@@ -163,7 +166,7 @@
             <div class="trending-title">{{ item.courseName }}</div>
             <div class="trending-meta">
               <span class="student-count">
-                <el-icon><User /></el-icon>
+                <el-icon><i-ep-user /></el-icon>
                 {{ item.studentCount || Math.floor(Math.random() * 2000) + 100 }} 人学习
               </span>
             </div>
@@ -179,6 +182,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+// 图标通过 el-icon 组件直接使用
 import { getPersonalizedRecommendations, getRecommendations } from '@/api/course'
 
 const router = useRouter()
@@ -190,6 +194,7 @@ const recommendations = ref([])
 const trending = ref([])
 const recommendType = ref('personalized')
 const viewedCount = ref(0)
+const likedCourses = ref(new Set()) // 存储已点赞的课程ID
 
 // 计算属性
 const avgMatchRate = computed(() => {
@@ -229,11 +234,32 @@ const getIcon = (name) => {
   return firstChar
 }
 
+// 当前用户ID（实际应从登录状态获取）
+const currentUserId = ref(1)
+
+// 行为追踪API
+const trackBehavior = async (courseId, behaviorType) => {
+  try {
+    await fetch('/api/recommendations/behavior', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: currentUserId.value,
+        courseId: courseId,
+        behaviorType: behaviorType,
+        timestamp: new Date().toISOString()
+      })
+    })
+  } catch (error) {
+    console.error('行为追踪失败:', error)
+  }
+}
+
 // 加载个性化推荐
 const loadRecommendations = async () => {
   loading.value = true
   try {
-    const userId = 1 // 临时使用固定用户ID，实际应从登录状态获取
+    const userId = currentUserId.value
     const res = await getPersonalizedRecommendations(userId, 8)
     if (res.code === 200) {
       recommendations.value = res.data.map((item, index) => ({
@@ -241,6 +267,9 @@ const loadRecommendations = async () => {
         score: item.score || (0.95 - index * 0.08),
         reason: item.reason || getReasonByScore(item.score || (0.95 - index * 0.08))
       }))
+      
+      // 记录浏览行为
+      trackBehavior(null, 'browse')
     }
   } catch (error) {
     console.error('获取推荐失败:', error)
@@ -282,23 +311,40 @@ const refreshRecommendations = () => {
 // 查看详情
 const viewDetail = (item) => {
   viewedCount.value++
+  // 埋点：浏览课程
+  trackBehavior(item.courseId, 'view')
   router.push(`/courses`)
   ElMessage.info(`查看课程: ${item.courseName}`)
 }
 
 // 添加到收藏
-const addToFavorites = (item) => {
+const addToFavorites = async (item) => {
+  // 埋点：收藏
+  await trackBehavior(item.courseId, 'favorite')
   ElMessage.success(`已收藏: ${item.courseName}`)
 }
 
 // 分享
-const shareItem = (item) => {
+const shareItem = async (item) => {
+  // 埋点：分享
+  await trackBehavior(item.courseId, 'share')
   ElMessage.success(`分享: ${item.courseName}`)
 }
 
-// 记录行为
-const recordBehavior = (item, type) => {
-  if (type === 'like') {
+// 切换点赞状态
+const toggleLike = async (item) => {
+  const courseId = item.courseId
+  const isLiked = likedCourses.value.has(courseId)
+  
+  if (isLiked) {
+    // 取消点赞
+    likedCourses.value.delete(courseId)
+    await trackBehavior(currentUserId.value, courseId, 'unlike')
+    ElMessage.success(`取消点赞: ${item.courseName}`)
+  } else {
+    // 点赞
+    likedCourses.value.add(courseId)
+    await trackBehavior(currentUserId.value, courseId, 'like')
     ElMessage.success(`点赞: ${item.courseName}`)
   }
 }

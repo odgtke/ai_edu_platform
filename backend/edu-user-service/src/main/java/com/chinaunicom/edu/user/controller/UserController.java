@@ -1,6 +1,5 @@
 package com.chinaunicom.edu.user.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.chinaunicom.edu.common.Result;
 import com.chinaunicom.edu.user.entity.User;

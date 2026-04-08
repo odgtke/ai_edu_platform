@@ -41,10 +41,10 @@ public enum ExceptionEnum {
     }
 
     public Integer getCode() {
-        return code;
+        return  this.code;
     }
 
     public String getMessage() {
-        return message;
+        return  this.message;
     }
 }

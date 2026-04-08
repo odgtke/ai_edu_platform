@@ -4,7 +4,7 @@ server:
 spring:
   application:
     name: edu-agent-service
-  
+
   # Nacos配置中心
   cloud:
     nacos:

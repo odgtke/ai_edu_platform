@@ -16,6 +16,7 @@ public class LangChainAgentController {
         Map<String, Object> response = new HashMap<>();
         response.put("reply", "This is a mock response for: " + message);
         response.put("type", "text");
+        response.put("source", "mock");
         return Result.success(response);
     }
 
